@@ -1,0 +1,120 @@
+import { QdrantClient } from '@qdrant/js-client-rest';
+import { embeddingService } from './embedding.service';
+import { config } from '../config';
+import crypto from 'crypto';
+
+class QdrantService {
+  private client: QdrantClient;
+  private collectionName = 'context_collection';
+
+  constructor() {
+    // Используем централизованный конфиг
+    this.client = new QdrantClient({ 
+      host: config.qdrant.host, 
+      port: config.qdrant.port 
+    });
+  }
+
+  async initializeSchema() {
+    try {
+      const collections = await this.client.getCollections();
+      const exists = collections.collections.some(c => c.name === this.collectionName);
+      
+      if (!exists) {
+        console.log(`Создание коллекции Qdrant: ${this.collectionName}`);
+        await this.client.createCollection(this.collectionName, {
+          vectors: { 
+            size: config.embedding.dimensions, // Используем значение из конфига
+            distance: 'Cosine' 
+          },
+          // Оптимизация для экономии памяти на слабом железе
+          optimizers_config: {
+            default_segment_number: 2
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Ошибка инициализации Qdrant:', error);
+      throw error;
+    }
+  }
+
+  // Метод для создания контекста (с чанкингом)
+  async createContext(data: { id: string, content: string, metadata?: any }, syncId?: string) {
+    // 1. Нарезаем текст и получаем эмбеддинги через сервис (с чанкингом)
+    const chunks = await embeddingService.getChunksAndEmbeddings(data.content);
+    
+    // 2. Формируем точки (points) для Qdrant
+    const points = chunks.map((item, index) => ({
+      id: crypto.randomUUID(),
+      vector: item.vector,
+      payload: { 
+        text: item.text,
+        original_id: data.id,
+        sync_id: syncId,
+        metadata: data.metadata,
+        chunk_index: index
+      }
+    }));
+
+    // 3. Загружаем в базу
+    return await this.client.upsert(this.collectionName, { 
+      wait: true, 
+      points 
+    });
+  }
+
+  // Метод для пакетной обработки (требовался для sync.routes.ts)
+  async batchCreateContexts(items: any[], syncId: string) {
+    console.log(`Пакетная обработка ${items.length} элементов в Qdrant...`);
+    
+    let successful = 0;
+    let failed = 0;
+
+    for (const item of items) {
+      try {
+        await this.createContext(item, syncId);
+        successful++;
+      } catch (err) {
+        console.error(`Ошибка при создании контекста для ${item.id}:`, err);
+        failed++;
+      }
+    }
+
+    return { successful, failed };
+  }
+
+  // Семантический поиск
+  async semanticSearch(params: { query: string, limit?: number }) {
+    // Генерируем вектор запроса
+    const vector = await embeddingService.getEmbedding(params.query);
+    
+    const results = await this.client.search(this.collectionName, {
+      vector,
+      limit: params.limit || 5,
+      with_payload: true
+    });
+
+    // Форматируем результат под требования вашего приложения (аналог Weaviate)
+    return results.map(hit => ({
+      id: hit.id,
+      score: hit.score,
+      content: hit.payload?.text,
+      metadata: hit.payload?.metadata,
+      original_id: hit.payload?.original_id
+    }));
+  }
+
+  // Проверка здоровья
+  async healthCheck() {
+    try {
+      await this.client.getCollections();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+}
+
+export const qdrantService = new QdrantService();
+

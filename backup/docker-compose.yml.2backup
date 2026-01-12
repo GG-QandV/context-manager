@@ -1,0 +1,35 @@
+services:
+  context-manager:
+    build: .
+    container_name: context-manager
+    ports:
+      - "3847:3847"
+    environment:
+      - DATABASE_URL=postgresql://postgres:Mart436780@postgresql-postgres-main-1:5432/context_db
+      - QDRANT_HOST=qdrant-new
+      - QDRANT_PORT=6333
+      - TEI_HOST=http://tei-embeddings:80
+      - EMBEDDING_PROVIDER=huggingface-tei
+      - EMBEDDING_DIMENSIONS=384
+    networks:
+      - orchestrator-network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    mem_limit: 1836m
+    restart: unless-stopped
+
+  tei-embeddings:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
+    container_name: tei-service
+    networks:
+      - orchestrator-network
+    volumes:
+      - /home/gg/orchestrator/models/embedding/multilingual-e5-small_Q8:/data
+    command: --model-id /data --pooling cls --auto-truncate
+    mem_limit: 1836m  # INT8 требует меньше памяти
+    restart: unless-stopped
+
+networks:
+  orchestrator-network:
+    name: orchestrator-network
+    external: true
