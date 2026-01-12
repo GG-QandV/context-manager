@@ -33,6 +33,7 @@ services:
     networks:
       - orchestrator-network
     volumes:
+      - /home/gg/.iflow:/root/.iflow:ro
       - /home/gg/orchestrator/models/embedding/multilingual-e5-small_Q8/onnx:/data:ro
     environment:
       - RAYON_NUM_THREADS=2
