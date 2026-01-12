@@ -61,7 +61,7 @@ export class PostgresService {
   }
 
   async createContext(
-    data: SaveContextBody,
+    data: SaveContextBody & { content_types?: string[] },
     syncId: string
   ): Promise<{ id: number; syncId: string }> {
     const summary = data.summary || 
@@ -71,10 +71,10 @@ export class PostgresService {
       `INSERT INTO development_context 
        (sync_id, session_id, context_type, content, summary, tags, metadata, 
         project_id, logical_section, module, tech_tags, phase, priority, 
-        deployment_stage, market_phase, sync_status)
+        deployment_stage, market_phase, content_types, sync_status)
        VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text[], $7::jsonb, 
                $8::text, $9::text, $10::text, $11::text[], $12::text, $13::text, 
-               $14::text, $15::text, 'pending'::text)
+               $14::text, $15::text, $16::text[], 'pending'::text)
        RETURNING id`,
       [
         syncId,
@@ -92,6 +92,7 @@ export class PostgresService {
         data.priority || null,
         data.deploymentStage || null,
         data.marketPhase || null,
+        data.content_types || [],
       ]
     );
 

@@ -1,4 +1,5 @@
 import { FastifyInstance } from 'fastify';
+import { contentDetector } from '../services/contentDetector.service';
 import { postgresService } from '../services/postgres.service';
 import { qdrantService } from '../services/qdrant.service';
 import {
@@ -35,9 +36,11 @@ export async function contextRoutes(fastify: FastifyInstance) {
     async (request, reply) => {
       const body = request.body;
       const syncId = postgresService.generateSyncId();
+      const detectedTypes = contentDetector.detectTypes(body.content || "");
 
       // Save to PostgreSQL first
-      const { id } = await postgresService.createContext(body, syncId);
+      const contextData = { ...body, content_types: detectedTypes };
+      const { id } = await postgresService.createContext(contextData, syncId);
 
       // ЗАМЕНА ТУТ (теперь синхронизируем с Qdrant):
       try {

@@ -1,3 +1,4 @@
+import { SaveContextBody } from "../schemas/context.schema";
 export const LOGICAL_SECTIONS = [
   // Development
   'backend', 'frontend', 'database', 'admin-panel', 
@@ -72,4 +73,8 @@ export interface PaginatedResponse<T> {
     nextCursor: string | null;
     count: number;
   };
+}
+
+export interface ContextDataWithTypes extends SaveContextBody {
+  content_types?: string[];
 }
