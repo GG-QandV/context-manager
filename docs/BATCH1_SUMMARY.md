@@ -58,3 +58,33 @@ curl -X POST http://localhost:3847/api/context/semantic-search \\
 - c161f32 - cleanup
 
 ## Статус: ✅ ЗАВЕРШЁН
+
+## Maintenance
+
+### Очистка БД (scheduled: Q2-Q3 2026)
+```bash
+# Удалить устаревшие записи (>6 месяцев)
+docker exec postgresql-postgres-main-1 psql -U postgres -d context_db -c "
+DELETE FROM development_context 
+WHERE created_at < NOW() - INTERVAL '6 months'
+  AND context_type != 'milestone';
+"
+Текущее состояние (2026-01-28)
+Postgres: 3 записи (2 milestone + 1 test)
+Qdrant: 4 точки
+Backup: development_context_backup_20260128 (26 deleted records)
+
+## Maintenance
+
+### Очистка БД (scheduled: Q2-Q3 2026)
+```bash
+# Удалить устаревшие записи (>6 месяцев)
+docker exec postgresql-postgres-main-1 psql -U postgres -d context_db -c "
+DELETE FROM development_context 
+WHERE created_at < NOW() - INTERVAL '6 months'
+  AND context_type != 'milestone';
+"
+Текущее состояние (2026-01-28)
+Postgres: 3 записи (2 milestone + 1 test)
+Qdrant: 4 точки
+Backup: development_context_backup_20260128 (26 deleted records)
