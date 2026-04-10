@@ -4,10 +4,10 @@ The core orchestration service for managing AI Agent context, providing a bridge
 
 ## ✨ Features
 
-- **Dual-Database Sync**: Automatic synchronization between PostgreSQL and Weaviate/Qdrant.
-- **MCP Integration**: Compatible with Model Context Protocol for seamless integration with AI tools.
-- **RESTful API**: Fast and secure endpoints built with Fastify.
-- **Semantic Retrieval**: Advanced RAG patterns support out-of-the-box.
+- **Dual-Database Sync**: Automatic real-time synchronization between PostgreSQL and Qdrant.
+- **Local Embeddings**: High-performance semantic processing using **multilingual-e5-small_Q8** via local TEI.
+- **MCP Native**: Full support for Model Context Protocol to bridge agent memories.
+- **RESTful API**: Secure endpoints built with Fastify for rapid context retrieval.
 
 ## 🛠 Setup & Installation
 
@@ -16,8 +16,10 @@ Create a `.env` file in this directory (refer to `.env.example` if available or 
 
 ```ini
 PORT=3847
-DATABASE_URL=postgresql://user:pass@host:port/db
-WEAVIATE_HOST=localhost:8087
+DATABASE_URL=postgresql://user:pass@host:5433/context_db
+QDRANT_HOST=localhost
+QDRANT_PORT=6333
+TEI_HOST=http://localhost:8080
 # ... see full list in .env
 ```
 
@@ -45,10 +47,10 @@ Detailed endpoint documentation can be found in `docs/` or inferred from the sch
 ## 🏗 Architecture
 
 The service is structured following modular patterns:
-- `src/services`: Core logic (Sync, Embeddings, DB access).
+- `src/services`: Core logic (Sync, Qdrant/Postgres integration, local Embeddings).
 - `src/routes`: API route definitions.
 - `src/schemas`: Validation schemas (TypeBox).
-- `resync_qdrant.py`: Utility script for manual high-volume vector synchronization.
+- `resync_qdrant.py`: High-speed utility for re-embedding and forced vector sync.
 
 ---
 **Maintained by:** GG-QandV  
