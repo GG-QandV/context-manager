@@ -1,6 +1,7 @@
 {
   "name": "context-manager",
   "version": "2.0.0",
+  "type": "module",
   "description": "Context management service for iFlow CLI",
   "main": "dist/index.js",
   "scripts": {
