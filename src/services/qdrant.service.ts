@@ -90,7 +90,7 @@ class QdrantService {
 
 
     await this.client.upsert(this.collectionName, {
-      wait: true,
+      wait: false,
       points
     });
   }

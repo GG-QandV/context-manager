@@ -41,15 +41,17 @@ export async function contextRoutes(fastify: FastifyInstance) {
       const contextData = { ...body, content_types: detectedTypes };
       const { id } = await postgresService.createContext(contextData, syncId);
 
-      try {
-        await qdrantService.createContext(contextData, syncId);
-
-        await postgresService.updateSyncStatus(syncId, 'synced');
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        request.log.error({ err: errorMessage }, 'Qdrant sync failed');
-        await postgresService.updateSyncStatus(syncId, 'failed');
-      }
+      // Фоновая векторизация и синхронизация с Qdrant (не блокирует ответ API)
+      (async () => {
+        try {
+          await qdrantService.createContext(contextData, syncId);
+          await postgresService.updateSyncStatus(syncId, 'synced');
+        } catch (err) {
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          request.log.error({ err: errorMessage, syncId }, 'Background Qdrant sync failed');
+          await postgresService.updateSyncStatus(syncId, 'failed');
+        }
+      })();
 
       return {
         success: true,
