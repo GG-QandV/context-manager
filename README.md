@@ -76,7 +76,14 @@ The service is structured following modular patterns:
 
 ## License
 
-This project is licensed under the **MIT License**. It is **100% free and open-source**.
+Copyright 2026 GG-QandV (Yevhenii N.)
+
+Licensed under the **Apache License, Version 2.0**.
+You may use, modify, and distribute this software under the terms of the License.
+A copy of the License is included in this repository: [LICENSE](./LICENSE)
+Attribution must be preserved as defined in [NOTICE](./NOTICE).
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 > [!WARNING]
 > **Disclaimer**: This software is provided "as is", without warranty of any kind. Users use this software at their own risk.
