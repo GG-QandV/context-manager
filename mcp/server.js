@@ -19,7 +19,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           session_id: { type: 'string' },
           agent: { type: 'string' }
         },
-        required: ['content']
+        required: ['content', 'agent']
       }
     },
     {
@@ -33,7 +33,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           session_id: { type: 'string' },
           agent: { type: 'string' }
         },
-        required: ['content', 'topics']
+        required: ['content', 'topics', 'agent']
       }
     },
     {
@@ -46,7 +46,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
           session_id: { type: 'string' },
           agent: { type: 'string' }
         },
-        required: ['content']
+        required: ['content', 'agent']
       }
     },
     {
@@ -128,7 +128,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-  const detectedAgent = process.env.MCP_CLIENT_NAME || args.agent || 'antigravity';
+  const detectedAgent = process.env.MCP_CLIENT_NAME || args.agent || 'unknown';
   
   try {
     if (name === 'cm_save_br') {
