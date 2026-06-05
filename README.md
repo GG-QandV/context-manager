@@ -123,6 +123,7 @@ You may use, modify, and distribute this software under the terms of the License
 A copy of the License is included in this repository: [LICENSE](./LICENSE)
 Attribution must be preserved as defined in [NOTICE](./NOTICE).
 
+[![Version](https://img.shields.io/badge/version-2.2.1-blue.svg)]()
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ## Presentation

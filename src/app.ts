@@ -75,7 +75,7 @@ app.post("/mcp", async (req, reply) => {
         },
         serverInfo: {
           name: "context-manager",
-          version: "2.1.1"
+          version: "2.2.1"
         }
       }
     });
