@@ -4,6 +4,15 @@
       "type": "stdio",
       "command": "node",
       "args": ["./mcp/server.js"]
+    },
+    "tg-bot": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./mcp/tg_bot_mcp.mjs"],
+      "env": {
+        "TG_BOT_TOKEN": "${TG_BOT_TOKEN}",
+        "TG_CHAT_ID": "${TG_CHAT_ID}"
+      }
     }
   }
 }

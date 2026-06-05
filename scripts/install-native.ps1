@@ -1,6 +1,6 @@
 param(
     [switch]$DryRun,
-    [string]$RepoZipUrl = "https://github.com/YOUR_ORG/context-manager/archive/refs/heads/main.zip" # TODO: Замените на реальный URL репозитория
+    [string]$RepoZipUrl = "https://github.com/GG-QandV/context-manager/archive/refs/heads/master.zip"
 )
 
 $ErrorActionPreference = "Stop"

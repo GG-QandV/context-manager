@@ -320,7 +320,7 @@ Copy-Item C:\context-manager\mcp.json "$env:APPDATA\Claude\claude_desktop_config
     "context-manager": {
       "type": "stdio",
       "command": "node",
-      "args": ["C:\\Users\\USERNAME\\AppData\\Roaming\\iflow\\mcp\\server.js"]
+      "args": ["%APPDATA%\\iflow\\mcp\\server.js"]
     }
   }
 }

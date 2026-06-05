@@ -74,5 +74,4 @@ services:
 networks:
   orchestrator-network:
     name: orchestrator-network
-    external: true
 

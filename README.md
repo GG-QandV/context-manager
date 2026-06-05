@@ -47,7 +47,7 @@ Runs on **Windows, Linux, and macOS**. No cloud required. No Docker required on 
 Open **PowerShell as Administrator** and run:
 
 ```powershell
-irm https://raw.githubusercontent.com/YOUR_ORG/context-manager/main/scripts/install-native.ps1 | iex
+irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 | iex
 ```
 
 This installs everything: PostgreSQL, Qdrant, the ONNX embedder, Context Manager itself, and the watchdog service. All registered as Windows services via nssm — they start automatically on boot, restart if they crash.
@@ -83,11 +83,20 @@ docker compose up -d
 ### macOS (native)
 
 ```bash
+# Prerequisites: PostgreSQL, Qdrant — install via Homebrew
+brew install postgresql@16 qdrant/tap/qdrant
+
+# Start services
+brew services start postgresql@16
+brew services start qdrant
+
+# Create database
+createdb context_db
+
+# Install and run Context Manager
 npm install
 npm run dev
 ```
-
-See `docs/Win10-11_adaptation_TODO.md` for native macOS setup details.
 
 ---
 
