@@ -941,7 +941,7 @@
         <td>ONNX Embedder (AI model)<br><span style="font-size:11px;color:#6b7280;">The meaning converter model</span></td>
         <td class="status-ok">✅ CPU</td>
         <td class="status-ok">✅</td>
-        <td class="status-err">❌ Docker only</td>
+        <td class="status-ok">✅ CPU</td>
       </tr>
       <tr>
         <td>Config file paths<br><span style="font-size:11px;color:#6b7280;">Where settings files live</span></td>
@@ -960,14 +960,13 @@
       </div>
       <div class="card">
         <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M218.27,169.49C199.86,156.84,196,135.6,196,120c0-19.17,14.25-35.53,22.75-43.57a4,4,0,0,0,0-5.81C207,59.48,186.59,52,168,52a68.3,68.3,0,0,0-40,13,67.61,67.61,0,0,0-87.88,7A70.65,70.65,0,0,0,20,123.3a123.11,123.11,0,0,0,38.9,86.92A35.81,35.81,0,0,0,83.6,220h87.7a35.84,35.84,0,0,0,26.19-11.3,119.93,119.93,0,0,0,17.24-23.79c6.08-11.1,5.42-12.62,4.94-13.72A4,4,0,0,0,218.27,169.49Zm-26.64,33.77A27.83,27.83,0,0,1,171.3,212H83.6a27.84,27.84,0,0,1-19.19-7.6A115.15,115.15,0,0,1,28,123.09,62.55,62.55,0,0,1,45.81,77.66,58.78,58.78,0,0,1,88,60h.84a59.37,59.37,0,0,1,36.66,13.15,4,4,0,0,0,5,0A59.35,59.35,0,0,1,168,60c15.12,0,31.45,5.41,42.11,13.73C200.68,83.42,188,100.16,188,120c0,23.79,8,42.44,23.12,54.17A107.64,107.64,0,0,1,191.63,203.26ZM132.13,31A36,36,0,0,1,167,4h1a4,4,0,0,1,0,8h-1a28,28,0,0,0-27.12,21A4,4,0,0,1,136,36a3.87,3.87,0,0,1-1-.13A4,4,0,0,1,132.13,31Z"/></svg> macOS</h3>
-        <p style="color: #fbbf24;">3 config adjustments.</p>
-        <p style="color: #9ca3af; font-size: 13px;">Code works perfectly. Only need to fix file paths in mcp.json and docker-compose.yml.</p>
-        <span class="glossary">Code works without changes, only config paths need adjustment</span>
+        <p style="color: #34d399;">Full support.</p>
+        <p style="color: #9ca3af; font-size: 13px;">Works natively, Docker Desktop, launchd service. Config paths use ~/Library/Application Support/.</p>
       </div>
       <div class="card">
         <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,44H40A12,12,0,0,0,28,56V200a12,12,0,0,0,12,12H216a12,12,0,0,0,12-12V56A12,12,0,0,0,216,44Zm4,156a4,4,0,0,1-4,4H40a4,4,0,0,1-4-4V56a4,4,0,0,1,4-4H216a4,4,0,0,1,4,4ZM76,84a8,8,0,1,1-8-8A8,8,0,0,1,76,84Zm40,0a8,8,0,1,1-8-8A8,8,0,0,1,116,84Z"/></svg> Windows</h3>
-        <p style="color: #fbbf24;">2 blockers.</p>
-        <p style="color: #9ca3af; font-size: 13px;">Need to replace hardcoded Linux paths with Windows paths. ONNX Embedder runs natively on Windows, Linux, and macOS.</p>
+        <p style="color: #34d399;">Full support.</p>
+        <p style="color: #9ca3af; font-size: 13px;">Native ONNX runtime, nssm service, one-click installer. All features work out of the box.</p>
       </div>
     </div>
   </div>
@@ -982,14 +981,7 @@
     A tool that helps AI remember — so you don't have to repeat yourself.<br>
     <span style="font-style:italic;">A tool that helps AI remember — so you never have to repeat yourself.</span>
   </p>
-  <div style="margin-top: 36px; max-width: 900px; margin-left: auto; margin-right: auto;">
-    <table class="compat-table">
-      <tr><th>Aspect</th><th>Description</th><th>macOS</th><th>Linux</th><th>Windows</th></tr>
-      <tr><td>Docker Desktop</td><td>Container platform</td><td><span class="status-ok">✅ HyperKit</span></td><td><span class="status-ok">✅ Native</span></td><td><span class="status-warn">⚠️ Needs VT-x/WSL2</span></td></tr>
-      <tr><td>TEI Embedder (AI model)</td><td>The meaning converter model</td><td><span class="status-ok">✅ CPU</span></td><td><span class="status-ok">✅</span></td><td><span class="status-warn">❌ Docker only</span></td></tr>
-      <tr><td>Config file paths</td><td>Where settings files live</td><td>~/Library/Application Support/</td><td>~/.config/</td><td>%APPDATA%</td></tr>
-    </table>
-  </div>
+
   <div style="margin-top: 48px;">
     <div style="display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
       <span style="color: #6b7280; font-size: 14px;"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,76H129.66L101.17,47.52A11.9,11.9,0,0,0,92.69,44H40A12,12,0,0,0,28,56V200.62A11.4,11.4,0,0,0,39.38,212H216.89A11.12,11.12,0,0,0,228,200.89V88A12,12,0,0,0,216,76ZM36,56a4,4,0,0,1,4-4H92.69a4,4,0,0,1,2.82,1.17L118.34,76H36ZM220,200.89a3.12,3.12,0,0,1-3.11,3.11H39.38A3.39,3.39,0,0,1,36,200.62V84H216a4,4,0,0,1,4,4Z"/></svg> context-manager/</span>
