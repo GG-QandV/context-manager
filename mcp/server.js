@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const API_BASE = process.env.CM_API_BASE || 'http://localhost:3847/api/context';
 
-const server = new Server({ name: 'cm', version: '2.0.1' }, { capabilities: { tools: {} } });
+const server = new Server({ name: 'cm', version: '2.2.1' }, { capabilities: { tools: {} } });
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [

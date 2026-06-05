@@ -38,7 +38,7 @@ const TOOLS = [
 ];
 
 function makeServer() {
-  const server = new Server({ name: 'cm', version: '2.0.1' }, { capabilities: { tools: {} } });
+  const server = new Server({ name: 'cm', version: '2.2.1' }, { capabilities: { tools: {} } });
 
   server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
 
