@@ -1,0 +1,184 @@
+**КОНТЕКСТ СЕССИИ 16-01-2026: CONTEXT MANAGER**
+
+**ЧТО ДЕЛАЕТ:**
+Сервис долговременной памяти для iFlow/Continue. Сохраняет контекст сессий разработки с семантическим поиском и NLP запросами по времени.
+
+**АРХИТЕКТУРА:**
+```
+iFlow/Continue → MCP Server → Fastify API → PostgreSQL + Qdrant
+                                         ↓
+                                    TEI (embeddings)
+```
+
+**КОМПОНЕНТЫ:**
+
+1. **Fastify API** (TypeScript, порт 3847)
+   - Точка входа: src/index.ts
+   - Роуты: src/routes/context.routes.ts
+   - Сервисы: postgres/qdrant/timeParser/contentDetector
+
+2. **PostgreSQL** (порт 5433, БД context_db)
+   - Таблица: development_context
+   - Колонки: content_brief (200 символов), content_important (2000), content_full (без лимита)
+   - Фильтры: session_id, logical_section, module, created_at, metadata
+
+3. **Qdrant** (порт 6334)
+   - Коллекция: DevelopmentContext
+   - Векторы: 384 размерность (multilingual-e5-small)
+   - Чанкинг: 512 токенов с overlap
+
+4. **MCP Server** (~/.iflow/mcp-servers/context-manager/server.js)
+   - SDK: @modelcontextprotocol/sdk 1.25.2
+   - Инструменты: context_save, context_search
+   - Протокол: stdio
+
+5. **TimeParser** (src/services/timeParser.service.ts)
+   - Парсинг: "вчера", "позавчера", "последние N дней"
+   - UTC корректировка через Date.UTC()
+
+**ВОРКФЛОУ:**
+
+**Сохранение:**
+1. MCP server.js получает context_save(content, level, session_id)
+2. POST http://localhost:3847/api/context/save
+3. contentDetector.detectTypes() → определяет типы (code/commands/tables/lists)
+4. postgresService.createContext() → INSERT в БД (sync_status='pending')
+5. qdrantService.createContext() → чанкинг + эмбеддинги + векторная запись
+6. postgresService.updateSyncStatus('synced')
+
+**Поиск SQL:**
+1. POST /api/context/query {"time_query": "вчера", "level": "backend"}
+2. timeParserService.parse() → date_from/date_to
+3. SQL: WHERE created_at >= $1 AND created_at <= $2 AND logical_section = $3
+4. Возврат: content_brief/important/full + metadata
+
+**Поиск семантический:**
+1. POST /api/context/semantic-search {"query": "PostgreSQL fix"}
+2. embeddingService.getEmbedding() → вектор 384
+3. qdrantService.search() → top-5 по cosine similarity
+4. Возврат: content + score
+
+**DOCKER:**
+- context-manager (3847) - API
+- postgresql-postgres-main-1 (5433) - БД
+- qdrant-new (6334) - векторы
+- tei-service (8080) - эмбеддинги
+- llm-service (8085) - Qwen 7B Q4_K_M
+
+**ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ:**
+- DATABASE_URL: postgresql://postgres:postgres@postgresql-postgres-main-1:5432/context_db
+- QDRANT_HOST: qdrant-new
+- QDRANT_PORT: 6333
+- EMBEDDING_API: http://tei-service:80
+
+**СТРУКТУРА ФАЙЛОВ:**
+```
+~/orchestrator/docker-stacks/context-manager/
+├── src/
+│   ├── index.ts (запуск Fastify + Qdrant init)
+│   ├── routes/context.routes.ts (endpoints + timeParser интеграция)
+│   ├── services/
+│   │   ├── postgres.service.ts (SQL методы)
+│   │   ├── qdrant.service.ts (векторный поиск)
+│   │   ├── timeParser.service.ts (NLP дат)
+│   │   └── contentDetector.service.ts (типы контента)
+│   └── types/index.ts (интерфейсы)
+├── dist/ (компилированный TypeScript)
+└── docker-compose.yml
+
+~/.iflow/
+├── mcp-servers/context-manager/server.js (MCP)
+└── context-manager-config.json (enabled/level/capture_types)
+```
+
+**ENDPOINTS:**
+- POST /api/context/save - сохранение
+- POST /api/context/query - SQL фильтры + time_query
+- POST /api/context/semantic-search - векторный поиск
+- GET /api/context/session/:id - по сессии
+- GET /api/context/today - сегодня
+- GET /health - статус сервисов
+
+---
+
+**ИНСТРУКЦИИ: кастомные инструкции уровень - добавление к систмным**
+
+**Батчинг команд:**
+- Объединять по возможности до 6-7 логически связанных команд через && или ;
+- Пример: создание файла1 + создание файла2 + компиляция двух файлов + проверка
+
+**Проверка синтаксиса (обязательно):**
+- TypeScript: npm run build (после каждого изменения src/)
+- JavaScript: node --check file.js
+- JSON: cat file.json | jq .
+- SQL: psql -c "EXPLAIN query"
+
+**Дозированные запросы:**
+- Логи: docker logs --tail 20 (количество по необходимости, не весь лог)
+- Файлы: head -50 file (количество по необходимости, не cat целиком)
+- БД: LIMIT 5 (количество по необходимости, не SELECT *)
+- Фильтрация: grep/awk/jq для конкретной информации
+
+**Ответы:**
+- Краткие без воды (1-2 предложения)
+- Без эмодзи
+- Markdown минимально (только code blocks)
+- Не забегать вперед (строго по текущему батчу) оптимально 1-2 максимум 3 запроса/коментария/вывода
+
+**Git:**
+- Commit после каждого батча или решения проблемы
+- Формат: "БАТЧ N: краткое описание\n- что сделано\n- что исправлено"
+- Push сразу после commit
+
+---
+
+**ЧТО СДЕЛАНО (кратко):**
+
+БАТЧ 1-3: БД schema, MCP server, API endpoints, Qdrant интеграция
+БАТЧ 4: contentDetector (code/commands/tables/lists/errors)
+БАТЧ 5: 44 агента обновлены с MCP блоком
+БАТЧ 6: PostgreSQL fix (content_brief/important/full заполняются)
+БАТЧ 7: TimeParser (вчера/позавчера/последние N дней) + UTC корректировка + интеграция в /api/context/query + тесты (вчера: 13, позавчера: 4, последние 3: 20)
+
+---
+
+**ЧТО ОСТАЛОСЬ (подробно):**
+
+**БАТЧ 5.4: Тест /cm status в iFlow CLI**
+- Запустить iFlow CLI
+- Выполнить команду /cm status
+- Проверить чтение ~/.iflow/context-manager-config.json
+- Ожидаемый вывод: enabled/level/capture_types
+- Если ошибка - диагностика через логи
+
+**БАТЧ 6.5: Тест MCP через Continue с Qwen**
+- Обновить ~/.continue/config.yaml для Qwen (url: http://localhost:8085)
+- Reload VS Code
+- Тест 1: Continue chat → "Use context_save to save: 'Test MCP integration'"
+- Проверка БД: SELECT * FROM development_context WHERE content ILIKE '%Test MCP%' ORDER BY created_at DESC LIMIT 1
+- Тест 2: Continue chat → "Use context_search to find PostgreSQL fixes"
+- Ожидается: найдет записи из БАТЧ 6 про content_brief/important/full
+- Тест 3: Агент code-reviewer через Continue использует context_search перед анализом
+
+**БАТЧ 8: Документация (опционально)**
+- README.md с примерами API запросов
+- Примеры curl для всех endpoints
+- Описание time_query синтаксиса
+- Troubleshooting секция
+
+**БАТЧ 10: Git финализация**
+- git commit БАТЧ 5.4 + 6.5 (если есть изменения)
+- git tag -a v1.0.0 -m "Context Manager v1.0: полная интеграция MCP + NLP parser"
+- git push --tags
+- Финальная проверка: docker ps (все healthy), curl /health (все connected)
+
+**КРИТИЧНЫЕ ПРОВЕРКИ ПЕРЕД v1.0.0:**
+1. MCP сервер отвечает (echo '{"jsonrpc":"2.0","method":"tools/list","id":1}' | node server.js)
+2. API health (curl http://localhost:3847/health)
+3. БД записи через MCP (тест context_save → проверка PostgreSQL)
+4. Семантический поиск работает (тест context_search → similarity > 0.7)
+5. TimeParser корректен (тест "вчера" → только записи за 2026-01-12)
+
+**Уточнения:**
+1. БАТЧ 5.4 - где находится логика обработки /cm команд в iFlow? В CLI или в агентах?
+2. БАТЧ 6.5 - есть ли готовый конфиг для Continue с локальной моделью или создавать с нуля?

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Manager — Emoji → SVG</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a0f;
+  color: #e0e0e0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  padding: 24px;
+}
+h1 {
+  font-size: 28px;
+  margin-bottom: 4px;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.subtitle { color: #888; font-size: 14px; margin-bottom: 28px; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+thead th {
+  text-align: left;
+  padding: 10px 12px;
+  color: #6b7280;
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid #2a2a35;
+  position: sticky;
+  top: 0;
+  background: #0a0a0f;
+  z-index: 10;
+}
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+.slide-name { color: #a78bfa; font-weight: 500; font-size: 12px; }
+.section-name { color: #9ca3af; font-size: 13px; }
+.emoji-col { font-size: 28px; text-align: center; width: 50px; }
+.desc { color: #d1d5db; font-size: 13px; max-width: 300px; }
+.candidates {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.candidate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+  min-width: 60px;
+}
+.candidate:hover {
+  background: rgba(124,58,237,0.08);
+  border-color: rgba(124,58,237,0.3);
+}
+.candidate.checked {
+  background: rgba(124,58,237,0.15);
+  border-color: #7c3aed;
+}
+.candidate svg {
+  width: 36px;
+  height: 36px;
+  color: #a78bfa;
+  display: block;
+  pointer-events: none;
+}
+.candidate.checked svg { color: #f0e6ff; }
+.candidate input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #7c3aed;
+  cursor: pointer;
+}
+.candidate .fname { font-size: 8px; color: #555; pointer-events: none; }
+.actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  align-items: center;
+}
+.btn {
+  padding: 8px 18px;
+  border: 1px solid #333;
+  border-radius: 8px;
+  background: #14141f;
+  color: #c4b5fd;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.btn:hover { border-color: #7c3aed; background: #1e1e2d; }
+.btn-primary { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+.btn-primary:hover { background: #6d28d9; }
+
+.output-box {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: #14141f;
+  border: 1px solid #2a2a35;
+  border-radius: 8px;
+  display: none;
+}
+.output-box.show { display: block; }
+.output-box textarea {
+  width: 100%;
+  min-height: 120px;
+  background: #0a0a0f;
+  color: #c4b5fd;
+  border: 1px solid #333;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 12px;
+  font-family: monospace;
+  margin-top: 8px;
+  resize: vertical;
+}
+.group-header { background: rgba(124,58,237,0.05); }
+</style>
+</head>
+<body>
+<h1>Context Manager — Emoji → SVG</h1>
+<p class="subtitle">Выберите SVG-иконки для замены эмодзи в презентации · поставьте ✓ напротив понравившейся</p>
+
+<div class="actions">
+  <button class="btn" id="selectAll">Выделить все</button>
+  <button class="btn" id="clearAll">Снять все</button>
+  <button class="btn btn-primary" id="showSelected">Показать выбранное</button>
+</div>
+
+<table id="mainTable">
+<thead><tr>
+  <th style="width:12%">Слайд</th>
+  <th style="width:18%">Раздел</th>
+  <th style="width:4%">Эмодзи</th>
+  <th style="width:26%">Описание / значение</th>
+  <th style="width:40%">Кандидаты SVG</th>
+</tr></thead>
+<tbody>
+<tr>
+  <td class="slide-name">Title</td>
+  <td class="section-name">Meta bar</td>
+  <td class="emoji-col">⚡</td>
+  <td class="desc">Node.js + Fastify</td>
+  <td><div class="candidates"><label class="candidate" data-file="lightning-thin.svg" data-name="lightning">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M211.89,119.09a4,4,0,0,0-2.49-2.84l-60.81-22.8,15.33-76.67a4,4,0,0,0-6.84-3.51l-112,120a4,4,0,0,0-1,3.64,4,4,0,0,0,2.49,2.84l60.81,22.8L92.08,239.22a4,4,0,0,0,6.84,3.51l112-120A4,4,0,0,0,211.89,119.09ZM102.68,227l13.24-66.2a4,4,0,0,0-2.52-4.53L55,134.36,153.32,29l-13.24,66.2a4,4,0,0,0,2.52,4.53L201,121.64Z"/></svg>
+  <span class="fname">lightning-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Title</td>
+  <td class="section-name">Meta bar</td>
+  <td class="emoji-col">🗄️</td>
+  <td class="desc">PostgreSQL + Qdrant</td>
+  <td><div class="candidates"><label class="candidate" data-file="database-thin.svg" data-name="database">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M192.14,42.55C174.94,33.17,152.16,28,128,28S81.06,33.17,63.86,42.55C45.89,52.35,36,65.65,36,80v96c0,14.35,9.89,27.65,27.86,37.45,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c18-9.8,27.86-23.1,27.86-37.45V80C220,65.65,210.11,52.35,192.14,42.55ZM212,176c0,11.29-8.41,22.1-23.69,30.43C172.27,215.18,150.85,220,128,220s-44.27-4.82-60.31-13.57C52.41,198.1,44,187.29,44,176V149.48c4.69,5.93,11.37,11.34,19.86,16,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c8.49-4.63,15.17-10,19.86-16Zm0-48c0,11.29-8.41,22.1-23.69,30.43C172.27,167.18,150.85,172,128,172s-44.27-4.82-60.31-13.57C52.41,150.1,44,139.29,44,128V101.48c4.69,5.93,11.37,11.34,19.86,16,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c8.49-4.63,15.17-10,19.86-16Zm-23.69-17.57C172.27,119.18,150.85,124,128,124s-44.27-4.82-60.31-13.57C52.41,102.1,44,91.29,44,80s8.41-22.1,23.69-30.43C83.73,40.82,105.15,36,128,36s44.27,4.82,60.31,13.57C203.59,57.9,212,68.71,212,80S203.59,102.1,188.31,110.43Z"/></svg>
+  <span class="fname">database-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Title</td>
+  <td class="section-name">Meta bar</td>
+  <td class="emoji-col">🧠</td>
+  <td class="desc">multilingual-e5-small (AI model)</td>
+  <td><div class="candidates"><label class="candidate" data-file="brain-thin.svg" data-name="brain">
+  <input type="checkbox" class="cb">
+  <svg
+   viewBox="0 0 256 256"
+   fill="currentColor"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="brain-thin.svg"
+   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.972165"
+     inkscape:cx="34.226345"
+     inkscape:cy="87.720855"
+     inkscape:window-width="1648"
+     inkscape:window-height="958"
+     inkscape:window-x="0"
+     inkscape:window-y="40"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="M 244,124.00001 C 243.9732,103.0157 235.41627,81.813909 216.05646,73.718249 v -4 C 216.04226,49.038219 197.57212,33.440725 177.36604,29.038685 157.15996,24.636645 136.61524,34.899975 128,53.700005 119.38476,34.899975 98.840042,24.636645 78.633963,29.038685 58.427885,33.440725 40.428798,48.093084 40.414566,68.773114 v 4 c -19.377641,8.07402 -28.414565,30.234456 -28.414565,51.226896 0,20.99244 7.60275,38.85034 26.980391,46.92436 v 4 c 0.01423,20.68003 19.447493,39.63491 39.653571,44.03695 C 98.840042,223.36335 119.38476,213.10003 128,194.3 c 8.61524,18.80003 29.15996,29.06335 49.36604,24.66132 20.20608,-4.40204 36.0539,-20.48857 36.06813,-41.1686 v -4 C 232.79932,165.70354 243.9812,144.98676 244,124.00001 Z M 88,212 C 68.117749,212 46.980392,194.80662 46.980392,174.92437 v -1.41 c 3.931827,0.93353 7.958869,1.40671 12,1.41 h 8 c 5.333331,0 5.333331,-8 0,-8 h -8 c -21.44834,0.0243 -34.769485,-14.34416 -38.396569,-35.48359 -3.627083,-21.13944 4.931032,-45.040906 25.160743,-52.167666 1.599073,-0.56377 2.668977,-2.07446 2.67,-3.77 v -6.73 c 0,-19.88227 19.703183,-32.773099 39.585434,-32.773099 19.88225,0 36,16.11772 36,35.99999 V 150.75 c -8.22819,-11.74231 -21.66176,-18.73896 -36,-18.74999 -5.333331,0 -5.333331,8 0,8 19.88226,0 35.99998,16.11774 35.99998,35.99999 0,19.88225 -16.11772,36 -35.99998,36 z m 105.43417,-42.20728 h -8 c -5.33333,0 -5.33333,8 0,8 h 8 c 4.04113,-0.003 8.06817,-0.47647 12,-1.41 v 1.41 c 0,14.56063 -10.20534,25.8949 -23.65736,31.46669 -13.45199,5.57179 -28.93549,2.49101 -39.23136,-7.80486 -10.29587,-10.29587 -13.37665,-25.77937 -7.80486,-39.23136 5.57179,-13.45202 18.69878,-22.22318 33.25941,-22.22318 5.33333,0 5.33333,-8 0,-8 -14.33824,0.011 -27.77181,7.00768 -36,18.74999 V 72.000005 c 0,-19.88227 16.11775,-35.99999 36,-35.99999 19.88225,0 40.05646,13.835964 40.05646,33.718234 v 6.73 c 0.001,1.69554 1.07093,3.20623 2.67,3.77 20.22971,7.12676 28.3168,30.083091 24.68972,51.222531 -3.62709,21.13943 -20.53367,38.37626 -41.98201,38.35194 z"
+     id="path1"
+     sodipodi:nodetypes="cccscsccsccscscccssccsscsccsssccssscssccsssssccsssccsc" />
+  <path
+     d="m 173.80762,152.38215 c -16.81912,5.42734 -26.05397,23.46167 -20.62662,40.28079 l 1.22838,3.80671 c 1.63785,5.07561 9.25127,2.61885 7.61342,-2.45677 l -1.22839,-3.80671 c -4.0705,-12.61434 2.85564,-26.14009 15.46998,-30.2106 l 3.80671,-1.22838 c 5.07562,-1.63785 2.61885,-9.25127 -2.45677,-7.61343 z"
+     id="path1-9-8" />
+  <path
+     d="m 100.85433,101.07282 c -17.673108,0 -31.999988,14.32689 -31.999988,32 v 4 c 0,5.33333 7.99999,5.33333 7.99999,0 v -4 c 0,-13.25483 10.74517,-24 23.999998,-24 h 4 c 5.33333,0 5.33333,-8 0,-8 z"
+     id="path1-9-8-9" />
+  <path
+     d="m 103.07563,59.128852 c 0,17.67311 -14.326888,32.000003 -32,32.000003 h -4 c -5.333331,0 -5.333331,-8.000003 0,-8.000003 h 4 c 13.254834,0 24,-10.745166 24,-24 v -4 c 0,-5.333331 8,-5.333331 8,0 z"
+     id="path1-5" />
+  <path
+     d="m 195.7367,87.128851 c 0,2.209144 -1.79086,4.000004 -4,4.000004 h -4 c -17.67311,0 -32,-14.326894 -32,-32.000009 v -4 c 0,-5.33333 8,-5.33333 8,0 v 4 c 0,13.25483 10.74517,24.000005 24,24.000005 h 4 c 2.20914,0 4,1.79086 4,4 z"
+     id="path1-59" />
+  <path
+     d="m 155.41176,101.07282 c 17.67311,0 31.99999,14.32689 31.99999,32 v 4 c 0,5.33333 -7.99999,5.33333 -7.99999,0 v -4 c 0,-13.25483 -10.74517,-24 -24,-24 h -4 c -5.33333,0 -5.33333,-8 0,-8 z"
+     id="path1-9-8-9-1" />
+  <path
+     d="m 219.58753,107.1023 c 7.54258,15.98275 0.70047,35.05379 -15.28228,42.59636 l -3.61742,1.70713 c -4.82322,2.27618 -8.23747,-4.95865 -3.41425,-7.23482 l 3.61741,-1.70713 c 11.98706,-5.65693 17.11865,-19.96023 11.46172,-31.94729 l -1.70713,-3.61741 c -2.27617,-4.82322 4.95865,-8.23748 7.23482,-3.41426 z"
+     id="path1-9-8-9-1-4" />
+  <path
+     d="m 83.451717,152.38215 c 16.819123,5.42734 26.053973,23.46167 20.626623,40.28079 l -1.22838,3.80671 c -1.63785,5.07561 -9.251272,2.61885 -7.613422,-2.45677 l 1.22839,-3.80671 c 4.070502,-12.61434 -2.85564,-26.14009 -15.469981,-30.2106 l -3.80671,-1.22838 c -5.07562,-1.63785 -2.61885,-9.25127 2.45677,-7.61343 z"
+     id="path1-9-8-8" />
+  <path
+     d="m 37.446354,107.1023 c -7.54258,15.98275 -0.70047,35.05379 15.28228,42.59636 l 3.61742,1.70713 c 4.82322,2.27618 8.23747,-4.95865 3.41425,-7.23482 l -3.61741,-1.70713 c -11.98706,-5.65693 -17.11865,-19.96023 -11.46172,-31.94729 l 1.70713,-3.61741 c 2.27617,-4.82322 -4.95865,-8.237481 -7.23482,-3.41426 z"
+     id="path1-9-8-9-1-4-9" />
+</svg>
+  <span class="fname">brain-thin.svg</span>
+</label><label class="candidate" data-file="brain-thin-o.svg" data-name="brain-thin-o">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M244,124a52.1,52.1,0,0,0-32-48V72a44,44,0,0,0-84-18.3A44,44,0,0,0,44,72v4a52,52,0,0,0,0,96v4a44,44,0,0,0,84,18.3A44,44,0,0,0,212,176v-4A52.07,52.07,0,0,0,244,124ZM88,212a36,36,0,0,1-36-36v-1.41A52.13,52.13,0,0,0,64,176h8a4,4,0,0,0,0-8H64A44,44,0,0,1,49.33,82.5,4,4,0,0,0,52,78.73V72a36,36,0,0,1,72,0v78.75A44,44,0,0,0,88,132a4,4,0,0,0,0,8,36,36,0,0,1,0,72Zm104-44h-8a4,4,0,0,0,0,8h8a52.13,52.13,0,0,0,12-1.41V176a36,36,0,1,1-36-36,4,4,0,0,0,0-8,44,44,0,0,0-36,18.75V72a36,36,0,0,1,72,0v6.73a4,4,0,0,0,2.67,3.77A44,44,0,0,1,192,168Zm12-56a4,4,0,0,1-4,4h-4a32,32,0,0,1-32-32V80a4,4,0,0,1,8,0v4a24,24,0,0,0,24,24h4A4,4,0,0,1,204,112ZM92,84a32,32,0,0,1-32,32H56a4,4,0,0,1,0-8h4A24,24,0,0,0,84,84V80a4,4,0,0,1,8,0Z"/></svg>
+  <span class="fname">brain-thin-o.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Title</td>
+  <td class="section-name">Meta bar</td>
+  <td class="emoji-col">🔌</td>
+  <td class="desc">Universal connector (MCP)</td>
+  <td><div class="candidates"><label class="candidate" data-file="plug-thin.svg" data-name="plug">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M234.83,69.17a4,4,0,0,0-5.66,0L192,106.34,149.66,64l37.17-37.17a4,4,0,1,0-5.66-5.66L144,58.34,114.83,29.17a4,4,0,0,0-5.66,5.66L118.34,44,62.54,99.8a36.05,36.05,0,0,0,0,50.91l18.55,18.54L29.17,221.17a4,4,0,0,0,5.66,5.66l51.92-51.92,18.54,18.55a36.06,36.06,0,0,0,50.91,0l55.8-55.8,9.17,9.17a4,4,0,0,0,5.66-5.66L197.66,112l37.17-37.17A4,4,0,0,0,234.83,69.17ZM150.54,187.8a28,28,0,0,1-39.59,0L68.2,145.05a28,28,0,0,1,0-39.59L124,49.66,206.34,132Z"/></svg>
+  <span class="fname">plug-thin.svg</span>
+</label><label class="candidate" data-file="plug-charging-thin.svg" data-name="plug-charging">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,60H172V16a4,4,0,0,0-8,0V60H92V16a4,4,0,0,0-8,0V60H32.55C28.13,60,28,63.59,28,64a4,4,0,0,0,4,4H52v92a36,36,0,0,0,36,36h36v44a4,4,0,0,0,8,0V196h36a36,36,0,0,0,36-36V68h20a4,4,0,0,0,0-8ZM196,160a28,28,0,0,1-28,28H88a28,28,0,0,1-28-28V68H196Zm-87.29-29.72a4,4,0,0,1-.46-3.68l12-32a4,4,0,0,1,7.5,2.8l-10,26.6H144a4,4,0,0,1,3.75,5.4l-12,32a4,4,0,1,1-7.5-2.8l10-26.6H112A4,4,0,0,1,108.71,130.28Z"/></svg>
+  <span class="fname">plug-charging-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">About</td>
+  <td class="section-name">Card: Problem</td>
+  <td class="emoji-col">🧠</td>
+  <td class="desc">The Problem (AI forgets between conversations)</td>
+  <td><div class="candidates"><label class="candidate" data-file="brain-thin.svg" data-name="brain">
+  <input type="checkbox" class="cb">
+  <svg
+   viewBox="0 0 256 256"
+   fill="currentColor"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="brain-thin.svg"
+   inkscape:version="1.4.2 (ebf0e94, 2025-05-08)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.972165"
+     inkscape:cx="34.226345"
+     inkscape:cy="87.720855"
+     inkscape:window-width="1648"
+     inkscape:window-height="958"
+     inkscape:window-x="0"
+     inkscape:window-y="40"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <path
+     d="M 244,124.00001 C 243.9732,103.0157 235.41627,81.813909 216.05646,73.718249 v -4 C 216.04226,49.038219 197.57212,33.440725 177.36604,29.038685 157.15996,24.636645 136.61524,34.899975 128,53.700005 119.38476,34.899975 98.840042,24.636645 78.633963,29.038685 58.427885,33.440725 40.428798,48.093084 40.414566,68.773114 v 4 c -19.377641,8.07402 -28.414565,30.234456 -28.414565,51.226896 0,20.99244 7.60275,38.85034 26.980391,46.92436 v 4 c 0.01423,20.68003 19.447493,39.63491 39.653571,44.03695 C 98.840042,223.36335 119.38476,213.10003 128,194.3 c 8.61524,18.80003 29.15996,29.06335 49.36604,24.66132 20.20608,-4.40204 36.0539,-20.48857 36.06813,-41.1686 v -4 C 232.79932,165.70354 243.9812,144.98676 244,124.00001 Z M 88,212 C 68.117749,212 46.980392,194.80662 46.980392,174.92437 v -1.41 c 3.931827,0.93353 7.958869,1.40671 12,1.41 h 8 c 5.333331,0 5.333331,-8 0,-8 h -8 c -21.44834,0.0243 -34.769485,-14.34416 -38.396569,-35.48359 -3.627083,-21.13944 4.931032,-45.040906 25.160743,-52.167666 1.599073,-0.56377 2.668977,-2.07446 2.67,-3.77 v -6.73 c 0,-19.88227 19.703183,-32.773099 39.585434,-32.773099 19.88225,0 36,16.11772 36,35.99999 V 150.75 c -8.22819,-11.74231 -21.66176,-18.73896 -36,-18.74999 -5.333331,0 -5.333331,8 0,8 19.88226,0 35.99998,16.11774 35.99998,35.99999 0,19.88225 -16.11772,36 -35.99998,36 z m 105.43417,-42.20728 h -8 c -5.33333,0 -5.33333,8 0,8 h 8 c 4.04113,-0.003 8.06817,-0.47647 12,-1.41 v 1.41 c 0,14.56063 -10.20534,25.8949 -23.65736,31.46669 -13.45199,5.57179 -28.93549,2.49101 -39.23136,-7.80486 -10.29587,-10.29587 -13.37665,-25.77937 -7.80486,-39.23136 5.57179,-13.45202 18.69878,-22.22318 33.25941,-22.22318 5.33333,0 5.33333,-8 0,-8 -14.33824,0.011 -27.77181,7.00768 -36,18.74999 V 72.000005 c 0,-19.88227 16.11775,-35.99999 36,-35.99999 19.88225,0 40.05646,13.835964 40.05646,33.718234 v 6.73 c 0.001,1.69554 1.07093,3.20623 2.67,3.77 20.22971,7.12676 28.3168,30.083091 24.68972,51.222531 -3.62709,21.13943 -20.53367,38.37626 -41.98201,38.35194 z"
+     id="path1"
+     sodipodi:nodetypes="cccscsccsccscscccssccsscsccsssccssscssccsssssccsssccsc" />
+  <path
+     d="m 173.80762,152.38215 c -16.81912,5.42734 -26.05397,23.46167 -20.62662,40.28079 l 1.22838,3.80671 c 1.63785,5.07561 9.25127,2.61885 7.61342,-2.45677 l -1.22839,-3.80671 c -4.0705,-12.61434 2.85564,-26.14009 15.46998,-30.2106 l 3.80671,-1.22838 c 5.07562,-1.63785 2.61885,-9.25127 -2.45677,-7.61343 z"
+     id="path1-9-8" />
+  <path
+     d="m 100.85433,101.07282 c -17.673108,0 -31.999988,14.32689 -31.999988,32 v 4 c 0,5.33333 7.99999,5.33333 7.99999,0 v -4 c 0,-13.25483 10.74517,-24 23.999998,-24 h 4 c 5.33333,0 5.33333,-8 0,-8 z"
+     id="path1-9-8-9" />
+  <path
+     d="m 103.07563,59.128852 c 0,17.67311 -14.326888,32.000003 -32,32.000003 h -4 c -5.333331,0 -5.333331,-8.000003 0,-8.000003 h 4 c 13.254834,0 24,-10.745166 24,-24 v -4 c 0,-5.333331 8,-5.333331 8,0 z"
+     id="path1-5" />
+  <path
+     d="m 195.7367,87.128851 c 0,2.209144 -1.79086,4.000004 -4,4.000004 h -4 c -17.67311,0 -32,-14.326894 -32,-32.000009 v -4 c 0,-5.33333 8,-5.33333 8,0 v 4 c 0,13.25483 10.74517,24.000005 24,24.000005 h 4 c 2.20914,0 4,1.79086 4,4 z"
+     id="path1-59" />
+  <path
+     d="m 155.41176,101.07282 c 17.67311,0 31.99999,14.32689 31.99999,32 v 4 c 0,5.33333 -7.99999,5.33333 -7.99999,0 v -4 c 0,-13.25483 -10.74517,-24 -24,-24 h -4 c -5.33333,0 -5.33333,-8 0,-8 z"
+     id="path1-9-8-9-1" />
+  <path
+     d="m 219.58753,107.1023 c 7.54258,15.98275 0.70047,35.05379 -15.28228,42.59636 l -3.61742,1.70713 c -4.82322,2.27618 -8.23747,-4.95865 -3.41425,-7.23482 l 3.61741,-1.70713 c 11.98706,-5.65693 17.11865,-19.96023 11.46172,-31.94729 l -1.70713,-3.61741 c -2.27617,-4.82322 4.95865,-8.23748 7.23482,-3.41426 z"
+     id="path1-9-8-9-1-4" />
+  <path
+     d="m 83.451717,152.38215 c 16.819123,5.42734 26.053973,23.46167 20.626623,40.28079 l -1.22838,3.80671 c -1.63785,5.07561 -9.251272,2.61885 -7.613422,-2.45677 l 1.22839,-3.80671 c 4.070502,-12.61434 -2.85564,-26.14009 -15.469981,-30.2106 l -3.80671,-1.22838 c -5.07562,-1.63785 -2.61885,-9.25127 2.45677,-7.61343 z"
+     id="path1-9-8-8" />
+  <path
+     d="m 37.446354,107.1023 c -7.54258,15.98275 -0.70047,35.05379 15.28228,42.59636 l 3.61742,1.70713 c 4.82322,2.27618 8.23747,-4.95865 3.41425,-7.23482 l -3.61741,-1.70713 c -11.98706,-5.65693 -17.11865,-19.96023 -11.46172,-31.94729 l 1.70713,-3.61741 c 2.27617,-4.82322 -4.95865,-8.237481 -7.23482,-3.41426 z"
+     id="path1-9-8-9-1-4-9" />
+</svg>
+  <span class="fname">brain-thin.svg</span>
+</label><label class="candidate" data-file="brain-thin-o.svg" data-name="brain-thin-o">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M244,124a52.1,52.1,0,0,0-32-48V72a44,44,0,0,0-84-18.3A44,44,0,0,0,44,72v4a52,52,0,0,0,0,96v4a44,44,0,0,0,84,18.3A44,44,0,0,0,212,176v-4A52.07,52.07,0,0,0,244,124ZM88,212a36,36,0,0,1-36-36v-1.41A52.13,52.13,0,0,0,64,176h8a4,4,0,0,0,0-8H64A44,44,0,0,1,49.33,82.5,4,4,0,0,0,52,78.73V72a36,36,0,0,1,72,0v78.75A44,44,0,0,0,88,132a4,4,0,0,0,0,8,36,36,0,0,1,0,72Zm104-44h-8a4,4,0,0,0,0,8h8a52.13,52.13,0,0,0,12-1.41V176a36,36,0,1,1-36-36,4,4,0,0,0,0-8,44,44,0,0,0-36,18.75V72a36,36,0,0,1,72,0v6.73a4,4,0,0,0,2.67,3.77A44,44,0,0,1,192,168Zm12-56a4,4,0,0,1-4,4h-4a32,32,0,0,1-32-32V80a4,4,0,0,1,8,0v4a24,24,0,0,0,24,24h4A4,4,0,0,1,204,112ZM92,84a32,32,0,0,1-32,32H56a4,4,0,0,1,0-8h4A24,24,0,0,0,84,84V80a4,4,0,0,1,8,0Z"/></svg>
+  <span class="fname">brain-thin-o.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">About</td>
+  <td class="section-name">Card: Solution</td>
+  <td class="emoji-col">⚡</td>
+  <td class="desc">The Solution (two-format save)</td>
+  <td><div class="candidates"><label class="candidate" data-file="lightning-thin.svg" data-name="lightning">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M211.89,119.09a4,4,0,0,0-2.49-2.84l-60.81-22.8,15.33-76.67a4,4,0,0,0-6.84-3.51l-112,120a4,4,0,0,0-1,3.64,4,4,0,0,0,2.49,2.84l60.81,22.8L92.08,239.22a4,4,0,0,0,6.84,3.51l112-120A4,4,0,0,0,211.89,119.09ZM102.68,227l13.24-66.2a4,4,0,0,0-2.52-4.53L55,134.36,153.32,29l-13.24,66.2a4,4,0,0,0,2.52,4.53L201,121.64Z"/></svg>
+  <span class="fname">lightning-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">About</td>
+  <td class="section-name">Card: Result</td>
+  <td class="emoji-col">🎯</td>
+  <td class="desc">The Result (AI remembers & shares context)</td>
+  <td><div class="candidates"><label class="candidate" data-file="target-thin.svg" data-name="target">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M218.26,84.89a100.16,100.16,0,1,1-22.44-30.37l25.35-25.35a4,4,0,1,1,5.66,5.66l-96,96a4,4,0,0,1-5.66-5.66l31-31a44,44,0,1,0,15.78,31.3,4,4,0,0,1,8-.46,52,52,0,1,1-18.1-36.51l28.34-28.33A92,92,0,0,0,63,193.05,92,92,0,0,0,211,88.33a4,4,0,1,1,7.22-3.44Z"/></svg>
+  <span class="fname">target-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Features</td>
+  <td class="section-name">Saving Context</td>
+  <td class="emoji-col">📥</td>
+  <td class="desc">Save to memory (3 levels: brief/important/full)</td>
+  <td><div class="candidates"><label class="candidate" data-file="download-simple-thin.svg" data-name="download-simple">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M220,144v64a4,4,0,0,1-4,4H40a4,4,0,0,1-4-4V144a4,4,0,0,1,8,0v60H212V144a4,4,0,0,1,8,0Zm-94.83,2.83a4,4,0,0,0,5.66,0l40-40a4,4,0,1,0-5.66-5.66L132,134.34V32a4,4,0,0,0-8,0V134.34L90.83,101.17a4,4,0,0,0-5.66,5.66Z"/></svg>
+  <span class="fname">download-simple-thin.svg</span>
+</label><label class="candidate" data-file="tray-thin.svg" data-name="tray">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,36H48A12,12,0,0,0,36,48V208a12,12,0,0,0,12,12H208a12,12,0,0,0,12-12V48A12,12,0,0,0,208,36ZM48,44H208a4,4,0,0,1,4,4V156H179.31a12,12,0,0,0-8.48,3.51l-19.32,19.32a4,4,0,0,1-2.82,1.17H107.31a4,4,0,0,1-2.82-1.17L85.17,159.51A12,12,0,0,0,76.69,156H44V48A4,4,0,0,1,48,44ZM208,212H48a4,4,0,0,1-4-4V164H76.69a4,4,0,0,1,2.82,1.17l19.32,19.32a12,12,0,0,0,8.48,3.51h41.38a12,12,0,0,0,8.48-3.51l19.32-19.32a4,4,0,0,1,2.82-1.17H212v44A4,4,0,0,1,208,212Z"/></svg>
+  <span class="fname">tray-thin.svg</span>
+</label><label class="candidate" data-file="floppy-disk-thin.svg" data-name="floppy-disk">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216.49,74.83,181.17,39.51A11.93,11.93,0,0,0,172.69,36H48A12,12,0,0,0,36,48V208a12,12,0,0,0,12,12H208a12,12,0,0,0,12-12V83.31A11.93,11.93,0,0,0,216.49,74.83ZM172,212H84V152a4,4,0,0,1,4-4h80a4,4,0,0,1,4,4Zm40-4a4,4,0,0,1-4,4H180V152a12,12,0,0,0-12-12H88a12,12,0,0,0-12,12v60H48a4,4,0,0,1-4-4V48a4,4,0,0,1,4-4H172.69a4,4,0,0,1,2.82,1.17l35.32,35.32A4,4,0,0,1,212,83.31ZM156,72a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h56A4,4,0,0,1,156,72Z"/></svg>
+  <span class="fname">floppy-disk-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Features</td>
+  <td class="section-name">Search & Analysis</td>
+  <td class="emoji-col">🔎</td>
+  <td class="desc">Find by meaning, filter by params, cross-agent</td>
+  <td><div class="candidates"><label class="candidate" data-file="magnifying-glass-thin.svg" data-name="magnifying-glass">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M226.83,221.17l-52.7-52.7a84.1,84.1,0,1,0-5.66,5.66l52.7,52.7a4,4,0,0,0,5.66-5.66ZM36,112a76,76,0,1,1,76,76A76.08,76.08,0,0,1,36,112Z"/></svg>
+  <span class="fname">magnifying-glass-thin.svg</span>
+</label><label class="candidate" data-file="magnifying-glass-plus-thin.svg" data-name="magnifying-glass-plus">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M148,112a4,4,0,0,1-4,4H116v28a4,4,0,0,1-8,0V116H80a4,4,0,0,1,0-8h28V80a4,4,0,0,1,8,0v28h28A4,4,0,0,1,148,112Zm78.83,114.83a4,4,0,0,1-5.66,0l-52.7-52.7a84.1,84.1,0,1,1,5.66-5.66l52.7,52.7A4,4,0,0,1,226.83,226.83ZM112,188a76,76,0,1,0-76-76A76.08,76.08,0,0,0,112,188Z"/></svg>
+  <span class="fname">magnifying-glass-plus-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Features</td>
+  <td class="section-name">Monitoring</td>
+  <td class="emoji-col">📊</td>
+  <td class="desc">Agent list, statistics, export</td>
+  <td><div class="candidates"><label class="candidate" data-file="chart-bar-thin.svg" data-name="chart-bar">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,204H212V40a4,4,0,0,0-4-4H152a4,4,0,0,0-4,4V84H96a4,4,0,0,0-4,4v44H48a4,4,0,0,0-4,4v68H32a4,4,0,0,0,0,8H224a4,4,0,0,0,0-8ZM156,44h48V204H156ZM100,92h48V204H100ZM52,140H92v64H52Z"/></svg>
+  <span class="fname">chart-bar-thin.svg</span>
+</label><label class="candidate" data-file="chart-line-thin.svg" data-name="chart-line">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,208a4,4,0,0,1-4,4H32a4,4,0,0,1-4-4V48a4,4,0,0,1,8,0V151.19L93.37,101a4,4,0,0,1,5-.19l61.41,46.05L221.37,93a4,4,0,0,1,5.26,6l-64,56a4,4,0,0,1-5,.19l-61.41-46L36,161.81V204H224A4,4,0,0,1,228,208Z"/></svg>
+  <span class="fname">chart-line-thin.svg</span>
+</label><label class="candidate" data-file="chart-pie-slice-thin.svg" data-name="chart-pie-slice">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M100,109.5v-72a4,4,0,0,0-5.33-3.77,100,100,0,0,0-65,112.5A4,4,0,0,0,35.6,149L98,113A4,4,0,0,0,100,109.5Zm-8-2.31L36.67,139.11A92,92,0,0,1,92,43.34ZM128,28a4,4,0,0,0-4,4v94.12L43.2,173.18a4,4,0,0,0-1.43,5.49A100,100,0,1,0,128,28Zm0,192a92.47,92.47,0,0,1-77.22-42L130,131.88a4,4,0,0,0,2-3.46V36.09A92,92,0,0,1,128,220Z"/></svg>
+  <span class="fname">chart-pie-slice-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Features</td>
+  <td class="section-name">Built-in Helpers</td>
+  <td class="emoji-col">🛠</td>
+  <td class="desc">Content detector, time parser, chunking</td>
+  <td><div class="candidates"><label class="candidate" data-file="wrench-thin.svg" data-name="wrench">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M223.05,70.5a4,4,0,0,0-6.42-1.44l-41.82,38.6L153,103l-4.68-21.79,38.6-41.82a4,4,0,0,0-1.44-6.43A68,68,0,0,0,98.94,126L36.4,180l-.21.2a28,28,0,0,0,39.6,39.6l.2-.21,54-62.54A68,68,0,0,0,228,96,67.51,67.51,0,0,0,223.05,70.5ZM160,156a60,60,0,0,1-29-7.47,4,4,0,0,0-5,.89L70,214.25A20,20,0,0,1,41.75,186l64.82-56a4,4,0,0,0,.89-5,60,60,0,0,1,69.46-86.59L141.05,77.29a4,4,0,0,0-1,3.55l5.66,26.35a4,4,0,0,0,3.07,3.07l26.35,5.66a4,4,0,0,0,3.55-1l38.87-35.87A60.05,60.05,0,0,1,160,156Z"/></svg>
+  <span class="fname">wrench-thin.svg</span>
+</label><label class="candidate" data-file="toolbox-thin.svg" data-name="toolbox">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,68H172V56a20,20,0,0,0-20-20H104A20,20,0,0,0,84,56V68H32A12,12,0,0,0,20,80V192a12,12,0,0,0,12,12H224a12,12,0,0,0,12-12V80A12,12,0,0,0,224,68ZM92,56a12,12,0,0,1,12-12h48a12,12,0,0,1,12,12V68H92ZM32,76H224a4,4,0,0,1,4,4v36H188V104a4,4,0,0,0-8,0v12H76V104a4,4,0,0,0-8,0v12H28V80A4,4,0,0,1,32,76ZM224,196H32a4,4,0,0,1-4-4V124H68v12a4,4,0,0,0,8,0V124H180v12a4,4,0,0,0,8,0V124h40v68A4,4,0,0,1,224,196Z"/></svg>
+  <span class="fname">toolbox-thin.svg</span>
+</label><label class="candidate" data-file="screwdriver-thin.svg" data-name="screwdriver">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M202.83,53.15a4,4,0,0,1,0,5.66l-56,56a4,4,0,0,1-5.66-5.66l56-56A4,4,0,0,1,202.83,53.15ZM244,58.41a46.13,46.13,0,0,1-13.6,32.83l-53.23,53.24a11.93,11.93,0,0,1-8.48,3.51H152a4,4,0,0,0-4,4v16.83a12.08,12.08,0,0,1-2.44,7.25c-.11.14-.23.28-.35.41l-8,8a12,12,0,0,1-17,0L98.7,163,18.83,242.83a4,4,0,0,1-5.66-5.66l79.88-79.88L71.51,135.75a12,12,0,0,1,0-17l8-8a3.62,3.62,0,0,1,.42-.36A12,12,0,0,1,87.17,108H104a4,4,0,0,0,4-4V87.3a12,12,0,0,1,3.51-8.49l53.24-53.23A46.43,46.43,0,0,1,244,58.41Zm-8,0a38.43,38.43,0,0,0-65.6-27.18L117.17,84.47A4,4,0,0,0,116,87.3V104a12,12,0,0,1-12,12H87.17a4,4,0,0,0-2.23.68l-7.77,7.77a4,4,0,0,0,0,5.66l48.72,48.72a4,4,0,0,0,5.66,0l7.77-7.77a4,4,0,0,0,.68-2.23V152a12,12,0,0,1,12-12h16.69a4,4,0,0,0,2.82-1.17l53.24-53.24A38.21,38.21,0,0,0,236,58.41Z"/></svg>
+  <span class="fname">screwdriver-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Deploy</td>
+  <td class="section-name">Docker Compose</td>
+  <td class="emoji-col">🐳</td>
+  <td class="desc">Containerized deployment (3 services)</td>
+  <td><div class="candidates"><label class="candidate" data-file="shipping-container-thin.svg" data-name="shipping-container">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M235.3,74.5,129.1,44.15a4.09,4.09,0,0,0-1.67-.11L22.3,59.06A12.06,12.06,0,0,0,12,70.94V185.06a12.06,12.06,0,0,0,10.3,11.88l105.13,15a3.64,3.64,0,0,0,.57,0,4.11,4.11,0,0,0,1.1-.15L235.3,181.5A12,12,0,0,0,244,170V86A12,12,0,0,0,235.3,74.5ZM96,124H76V59.47l48-6.86V203.39l-48-6.86V132H96a4,4,0,0,0,0-8ZM20,185.06V70.94a4,4,0,0,1,3.43-4L68,60.61V124H48a4,4,0,0,0,0,8H68v63.39L23.43,189A4,4,0,0,1,20,185.06ZM236,170a4,4,0,0,1-2.9,3.84L132,202.7V53.3L233.1,82.19A4,4,0,0,1,236,86Z"/></svg>
+  <span class="fname">shipping-container-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Deploy</td>
+  <td class="section-name">Native</td>
+  <td class="emoji-col">🖥️</td>
+  <td class="desc">Direct installation (npm install)</td>
+  <td><div class="candidates"><label class="candidate" data-file="desktop-thin.svg" data-name="desktop">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,44H48A20,20,0,0,0,28,64V176a20,20,0,0,0,20,20h76v24H96a4,4,0,0,0,0,8h64a4,4,0,0,0,0-8H132V196h76a20,20,0,0,0,20-20V64A20,20,0,0,0,208,44ZM48,52H208a12,12,0,0,1,12,12v84H36V64A12,12,0,0,1,48,52ZM208,188H48a12,12,0,0,1-12-12V156H220v20A12,12,0,0,1,208,188Z"/></svg>
+  <span class="fname">desktop-thin.svg</span>
+</label><label class="candidate" data-file="monitor-thin.svg" data-name="monitor">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,44H48A20,20,0,0,0,28,64V176a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V64A20,20,0,0,0,208,44Zm12,132a12,12,0,0,1-12,12H48a12,12,0,0,1-12-12V64A12,12,0,0,1,48,52H208a12,12,0,0,1,12,12Zm-56,48a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,224Z"/></svg>
+  <span class="fname">monitor-thin.svg</span>
+</label><label class="candidate" data-file="computer-tower-thin.svg" data-name="computer-tower">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M164,72a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,72Zm-4,28H96a4,4,0,0,0,0,8h64a4,4,0,0,0,0-8Zm44-60V216a12,12,0,0,1-12,12H64a12,12,0,0,1-12-12V40A12,12,0,0,1,64,28H192A12,12,0,0,1,204,40Zm-8,0a4,4,0,0,0-4-4H64a4,4,0,0,0-4,4V216a4,4,0,0,0,4,4H192a4,4,0,0,0,4-4ZM128,172a8,8,0,1,0,8,8A8,8,0,0,0,128,172Z"/></svg>
+  <span class="fname">computer-tower-thin.svg</span>
+</label><label class="candidate" data-file="laptop-thin.svg" data-name="laptop">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M232,172H220V72a20,20,0,0,0-20-20H56A20,20,0,0,0,36,72V172H24a4,4,0,0,0-4,4v16a20,20,0,0,0,20,20H216a20,20,0,0,0,20-20V176A4,4,0,0,0,232,172ZM44,72A12,12,0,0,1,56,60H200a12,12,0,0,1,12,12V172H44ZM228,192a12,12,0,0,1-12,12H40a12,12,0,0,1-12-12V180H228ZM148,88a4,4,0,0,1-4,4H112a4,4,0,0,1,0-8h32A4,4,0,0,1,148,88Z"/></svg>
+  <span class="fname">laptop-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Deploy</td>
+  <td class="section-name">Process Management</td>
+  <td class="emoji-col">📦</td>
+  <td class="desc">Auto-start services (nssm/systemd/launchd)</td>
+  <td><div class="candidates"><label class="candidate" data-file="package-thin.svg" data-name="package">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.76,69.66l-88-48.18a12,12,0,0,0-11.52,0l-88,48.18A12,12,0,0,0,28,80.18v95.64a12,12,0,0,0,6.24,10.52l88,48.18a11.95,11.95,0,0,0,11.52,0l88-48.18A12,12,0,0,0,228,175.82V80.18A12,12,0,0,0,221.76,69.66ZM126.08,28.5a3.94,3.94,0,0,1,3.84,0L216.67,76,178.5,96.89a4,4,0,0,0-.58-.4l-88-48.18Zm1.92,96L39.33,76,81.56,52.87l88.67,48.54Zm-89.92,54.8a4,4,0,0,1-2.08-3.5V83.29l88,48.16v94.91Zm179.84,0h0l-85.92,47V131.45l40-21.89V152a4,4,0,0,0,8,0V105.18l40-21.89v92.53A4,4,0,0,1,217.92,179.32Z"/></svg>
+  <span class="fname">package-thin.svg</span>
+</label><label class="candidate" data-file="cube-thin.svg" data-name="cube">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.76,69.66l-88-48.18a12,12,0,0,0-11.52,0l-88,48.18A12,12,0,0,0,28,80.18v95.64a12,12,0,0,0,6.24,10.52l88,48.18a11.95,11.95,0,0,0,11.52,0l88-48.18A12,12,0,0,0,228,175.82V80.18A12,12,0,0,0,221.76,69.66ZM126.08,28.5a3.94,3.94,0,0,1,3.84,0L216.67,76,128,124.52,39.33,76Zm-88,150.83A4,4,0,0,1,36,175.82V83.29l88,48.16v94.91Zm179.84,0-85.92,47V131.45l88-48.16v92.53A4,4,0,0,1,217.92,179.32Z"/></svg>
+  <span class="fname">cube-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Deploy</td>
+  <td class="section-name">Network</td>
+  <td class="emoji-col">📂</td>
+  <td class="desc">Ports & connectivity (3847, 8770, 8080)</td>
+  <td><div class="candidates"><label class="candidate" data-file="folder-thin.svg" data-name="folder">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,76H129.66L101.17,47.52A11.9,11.9,0,0,0,92.69,44H40A12,12,0,0,0,28,56V200.62A11.4,11.4,0,0,0,39.38,212H216.89A11.12,11.12,0,0,0,228,200.89V88A12,12,0,0,0,216,76ZM36,56a4,4,0,0,1,4-4H92.69a4,4,0,0,1,2.82,1.17L118.34,76H36ZM220,200.89a3.12,3.12,0,0,1-3.11,3.11H39.38A3.39,3.39,0,0,1,36,200.62V84H216a4,4,0,0,1,4,4Z"/></svg>
+  <span class="fname">folder-thin.svg</span>
+</label><label class="candidate" data-file="folder-open-thin.svg" data-name="folder-open">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M241.72,113a11.88,11.88,0,0,0-9.73-5H212V88a12,12,0,0,0-12-12H129.33l-28.8-21.6a12.05,12.05,0,0,0-7.2-2.4H40A12,12,0,0,0,28,64V208a4,4,0,0,0,4,4H211.09a4,4,0,0,0,3.79-2.74l28.49-85.47A11.86,11.86,0,0,0,241.72,113ZM40,60H93.33a4,4,0,0,1,2.4.8L125.6,83.2a4,4,0,0,0,2.4.8h72a4,4,0,0,1,4,4v20H69.76a12,12,0,0,0-11.38,8.21L36,183.35V64A4,4,0,0,1,40,60Zm195.78,61.26L208.2,204H37.55L66,118.74A4,4,0,0,1,69.76,116H232a4,4,0,0,1,3.79,5.26Z"/></svg>
+  <span class="fname">folder-open-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Compat</td>
+  <td class="section-name">Linux</td>
+  <td class="emoji-col">🐧</td>
+  <td class="desc">Full support, Docker-native, systemd</td>
+  <td><div class="candidates"><label class="candidate" data-file="linux-logo-thin.svg" data-name="linux-logo">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M226.49,211.12a4,4,0,0,1-5.61-.62C219.54,208.82,188,168.48,188,88A60,60,0,0,0,68,88c0,80.48-31.53,120.82-32.88,122.5a4,4,0,0,1-6.25-5C29.18,205.11,60,165.45,60,88a68,68,0,0,1,136,0c0,40.48,8.47,70.27,15.57,88.14,7.69,19.35,15.48,29.27,15.56,29.36A4,4,0,0,1,226.49,211.12ZM100,92a8,8,0,1,0,8,8A8,8,0,0,0,100,92Zm64,8a8,8,0,1,0-8,8A8,8,0,0,0,164,100ZM97.79,132.42a4,4,0,1,0-3.58,7.16l32,16a4,4,0,0,0,3.58,0l32-16a4,4,0,0,0-3.58-7.16L128,147.53ZM128,180a50.05,50.05,0,0,0-43.49,26.05,4,4,0,1,0,7,3.89,41.34,41.34,0,0,1,73,0A4,4,0,0,0,168,212a3.94,3.94,0,0,0,1.94-.51,4,4,0,0,0,1.55-5.44A50.07,50.07,0,0,0,128,180Z"/></svg>
+  <span class="fname">linux-logo-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Compat</td>
+  <td class="section-name">macOS</td>
+  <td class="emoji-col">🍎</td>
+  <td class="desc">Code works, need config path fixes</td>
+  <td><div class="candidates"><label class="candidate" data-file="apple-logo-thin.svg" data-name="apple-logo">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M218.27,169.49C199.86,156.84,196,135.6,196,120c0-19.17,14.25-35.53,22.75-43.57a4,4,0,0,0,0-5.81C207,59.48,186.59,52,168,52a68.3,68.3,0,0,0-40,13,67.61,67.61,0,0,0-87.88,7A70.65,70.65,0,0,0,20,123.3a123.11,123.11,0,0,0,38.9,86.92A35.81,35.81,0,0,0,83.6,220h87.7a35.84,35.84,0,0,0,26.19-11.3,119.93,119.93,0,0,0,17.24-23.79c6.08-11.1,5.42-12.62,4.94-13.72A4,4,0,0,0,218.27,169.49Zm-26.64,33.77A27.83,27.83,0,0,1,171.3,212H83.6a27.84,27.84,0,0,1-19.19-7.6A115.15,115.15,0,0,1,28,123.09,62.55,62.55,0,0,1,45.81,77.66,58.78,58.78,0,0,1,88,60h.84a59.37,59.37,0,0,1,36.66,13.15,4,4,0,0,0,5,0A59.35,59.35,0,0,1,168,60c15.12,0,31.45,5.41,42.11,13.73C200.68,83.42,188,100.16,188,120c0,23.79,8,42.44,23.12,54.17A107.64,107.64,0,0,1,191.63,203.26ZM132.13,31A36,36,0,0,1,167,4h1a4,4,0,0,1,0,8h-1a28,28,0,0,0-27.12,21A4,4,0,0,1,136,36a3.87,3.87,0,0,1-1-.13A4,4,0,0,1,132.13,31Z"/></svg>
+  <span class="fname">apple-logo-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">Compat</td>
+  <td class="section-name">Windows</td>
+  <td class="emoji-col">🪟</td>
+  <td class="desc">Path differences, TEI requires Docker</td>
+  <td><div class="candidates"><label class="candidate" data-file="windows-logo-thin.svg" data-name="windows-logo">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,140H128a4,4,0,0,0-4,4v57.45a4,4,0,0,0,3.28,3.94l80,14.55a4.37,4.37,0,0,0,.72.06,4,4,0,0,0,2.56-.93A4,4,0,0,0,212,216V144A4,4,0,0,0,208,140Zm-4,71.21-72-13.09V148h72ZM96,140H32a4,4,0,0,0-4,4v40a4,4,0,0,0,3.28,3.94l64,11.63a3.51,3.51,0,0,0,.72.07,4,4,0,0,0,4-4V144A4,4,0,0,0,96,140Zm-4,50.84L36,180.66V148H92ZM210.56,36.93a4,4,0,0,0-3.28-.87l-80,14.55A4,4,0,0,0,124,54.55V112a4,4,0,0,0,4,4h80a4,4,0,0,0,4-4V40A4,4,0,0,0,210.56,36.93ZM204,108H132V57.88l72-13.09ZM95.28,56.43l-64,11.63A4,4,0,0,0,28,72v40a4,4,0,0,0,4,4H96a4,4,0,0,0,4-4V60.36a4,4,0,0,0-4.72-3.93ZM92,108H36V75.34L92,65.16Z"/></svg>
+  <span class="fname">windows-logo-thin.svg</span>
+</label><label class="candidate" data-file="app-window-thin.svg" data-name="app-window">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,44H40A12,12,0,0,0,28,56V200a12,12,0,0,0,12,12H216a12,12,0,0,0,12-12V56A12,12,0,0,0,216,44Zm4,156a4,4,0,0,1-4,4H40a4,4,0,0,1-4-4V56a4,4,0,0,1,4-4H216a4,4,0,0,1,4,4ZM76,84a8,8,0,1,1-8-8A8,8,0,0,1,76,84Zm40,0a8,8,0,1,1-8-8A8,8,0,0,1,116,84Z"/></svg>
+  <span class="fname">app-window-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">End</td>
+  <td class="section-name">Project folder</td>
+  <td class="emoji-col">📁</td>
+  <td class="desc">context-manager/</td>
+  <td><div class="candidates"><label class="candidate" data-file="folder-thin.svg" data-name="folder">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,76H129.66L101.17,47.52A11.9,11.9,0,0,0,92.69,44H40A12,12,0,0,0,28,56V200.62A11.4,11.4,0,0,0,39.38,212H216.89A11.12,11.12,0,0,0,228,200.89V88A12,12,0,0,0,216,76ZM36,56a4,4,0,0,1,4-4H92.69a4,4,0,0,1,2.82,1.17L118.34,76H36ZM220,200.89a3.12,3.12,0,0,1-3.11,3.11H39.38A3.39,3.39,0,0,1,36,200.62V84H216a4,4,0,0,1,4,4Z"/></svg>
+  <span class="fname">folder-thin.svg</span>
+</label><label class="candidate" data-file="folder-open-thin.svg" data-name="folder-open">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M241.72,113a11.88,11.88,0,0,0-9.73-5H212V88a12,12,0,0,0-12-12H129.33l-28.8-21.6a12.05,12.05,0,0,0-7.2-2.4H40A12,12,0,0,0,28,64V208a4,4,0,0,0,4,4H211.09a4,4,0,0,0,3.79-2.74l28.49-85.47A11.86,11.86,0,0,0,241.72,113ZM40,60H93.33a4,4,0,0,1,2.4.8L125.6,83.2a4,4,0,0,0,2.4.8h72a4,4,0,0,1,4,4v20H69.76a12,12,0,0,0-11.38,8.21L36,183.35V64A4,4,0,0,1,40,60Zm195.78,61.26L208.2,204H37.55L66,118.74A4,4,0,0,1,69.76,116H232a4,4,0,0,1,3.79,5.26Z"/></svg>
+  <span class="fname">folder-open-thin.svg</span>
+</label></div></td>
+</tr><tr>
+  <td class="slide-name">End</td>
+  <td class="section-name">Docs folder</td>
+  <td class="emoji-col">📄</td>
+  <td class="desc">docs/</td>
+  <td><div class="candidates"><label class="candidate" data-file="file-text-thin.svg" data-name="file-text">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M210.83,85.17l-56-56A4,4,0,0,0,152,28H56A12,12,0,0,0,44,40V216a12,12,0,0,0,12,12H200a12,12,0,0,0,12-12V88A4,4,0,0,0,210.83,85.17ZM156,41.65,198.34,84H156ZM200,220H56a4,4,0,0,1-4-4V40a4,4,0,0,1,4-4h92V88a4,4,0,0,0,4,4h52V216A4,4,0,0,1,200,220Zm-36-84a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,136Zm0,32a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,168Z"/></svg>
+  <span class="fname">file-text-thin.svg</span>
+</label><label class="candidate" data-file="file-thin.svg" data-name="file">
+  <input type="checkbox" class="cb">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M210.83,85.17l-56-56A4,4,0,0,0,152,28H56A12,12,0,0,0,44,40V216a12,12,0,0,0,12,12H200a12,12,0,0,0,12-12V88A4,4,0,0,0,210.83,85.17ZM156,41.65,198.34,84H156ZM200,220H56a4,4,0,0,1-4-4V40a4,4,0,0,1,4-4h92V88a4,4,0,0,0,4,4h52V216A4,4,0,0,1,200,220Z"/></svg>
+  <span class="fname">file-thin.svg</span>
+</label></div></td>
+</tr></tbody></table>
+
+<div class="output-box" id="outputBox">
+  <strong>Выбрано: <span id="selCount">0</span> файлов</strong>
+  <button class="btn" id="copyBtn" style="margin-left:8px;">Копировать</button>
+  <textarea id="selOutput" readonly placeholder="Выбранные SVG файлы..."></textarea>
+</div>
+
+<script>
+const tbody = document.querySelector('#mainTable tbody');
+const outputBox = document.getElementById('outputBox');
+const selCount = document.getElementById('selCount');
+const selOutput = document.getElementById('selOutput');
+const copyBtn = document.getElementById('copyBtn');
+
+function update() {
+  const checked = document.querySelectorAll('.candidate .cb:checked');
+  selCount.textContent = checked.length;
+  if (checked.length === 0) { outputBox.classList.remove('show'); return; }
+  const lines = [];
+  checked.forEach(cb => {
+    const label = cb.closest('.candidate');
+    const file = label.dataset.file;
+    const tr = label.closest('tr');
+    const emoji = tr.querySelector('.emoji-col').textContent.trim();
+    const section = tr.querySelector('.section-name').textContent.trim();
+    lines.push(emoji + '  →  ' + file + '  (' + section + ')');
+  });
+  selOutput.value = lines.join('\n');
+  outputBox.classList.add('show');
+}
+
+document.querySelectorAll('.candidate .cb').forEach(cb => {
+  cb.addEventListener('change', () => {
+    cb.closest('.candidate').classList.toggle('checked', cb.checked);
+    update();
+  });
+});
+
+document.getElementById('selectAll').addEventListener('click', () => {
+  document.querySelectorAll('.candidate .cb').forEach(cb => { cb.checked = true; cb.closest('.candidate').classList.add('checked'); });
+  update();
+});
+
+document.getElementById('clearAll').addEventListener('click', () => {
+  document.querySelectorAll('.candidate .cb:checked').forEach(cb => { cb.checked = false; cb.closest('.candidate').classList.remove('checked'); });
+  update();
+});
+
+document.getElementById('showSelected').addEventListener('click', update);
+
+copyBtn.addEventListener('click', () => {
+  selOutput.select();
+  navigator.clipboard.writeText(selOutput.value).then(() => {
+    copyBtn.textContent = 'Скопировано!';
+    setTimeout(() => { copyBtn.textContent = 'Копировать'; }, 1500);
+  }).catch(() => {
+    document.execCommand('copy');
+    copyBtn.textContent = 'Скопировано!';
+    setTimeout(() => { copyBtn.textContent = 'Копировать'; }, 1500);
+  });
+});
+</script>
+</body>
+</html>
