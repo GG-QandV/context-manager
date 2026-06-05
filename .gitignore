@@ -21,16 +21,23 @@ node_modules/
 .vscode/
 
 # Private/dev docs (не для публичного репо)
+docs/TASK-*.md
+docs/WIN10_IMPLEMENTATION_TASK.md
+docs/Win10-11_adaptation_TODO.md
+docs/MCP_COMMANDS.md
+docs/MCP_Context_Manager_Setup_*.md
+docs/Context_Manager_Roadmap_*.md
 docs/HVOSTY_FIX_PLAN.md
 docs/INSTALL_PIPELINE_CHECKLIST.md
 docs/cm-presentation/TODO.md
-docs/cm-presentation/icons-browser.html
-docs/cm-presentation/icons-draft.html
+docs/cm-presentation/icons-*.html
 docs/cm-presentation/cm-presentation-uk_old.html
+docs/cm-presentation/cm-presentation.zip
+docs/cm-presentation/img/diagram-*.drawio
 docs/Контекст.md
 docs/4_new_session.md
-docs/context-16-01-26.txt
-docs/Context_session_26-01-26.md
+docs/context-*.txt
+docs/Context_session_*.md
 docs/ANTIGRAVITY_ANALYSIS.md
 docs/BATCH1_SUMMARY.md
 
