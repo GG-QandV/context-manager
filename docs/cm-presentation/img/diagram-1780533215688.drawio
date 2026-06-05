@@ -1,40 +1,40 @@
 <mxfile host="Electron">
-  <diagram id="UzzrStIHESN_C7ycVm4h" name="Страница-1">
+  <diagram id="UzzrStIHESN_C7ycVm4h" name="Page-1">
     <mxGraphModel dx="878" dy="608" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="680" math="0" shadow="0" adaptiveColors="auto">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="flow" parent="1" style="text;html=1;fontSize=11;fontColor=#333333;align=center;fillColor=none;strokeColor=none;whiteSpace=wrap;labelBackgroundColor=#FFD966;labelBorderColor=#FFD966;" value="Data flow (поток данных): API → PostgreSQL (save text) → TEI Embedder (convert to meaning) → Qdrant (store vector).(обе базы синхронизированы)." vertex="1">
+        <mxCell id="flow" parent="1" style="text;html=1;fontSize=11;fontColor=#333333;align=center;fillColor=none;strokeColor=none;whiteSpace=wrap;labelBackgroundColor=#FFD966;labelBorderColor=#FFD966;" value="Data flow (data flow): API → PostgreSQL (save text) → TEI Embedder (convert to meaning) → Qdrant (store vector).(both databases are synchronized)." vertex="1">
           <mxGeometry height="30" width="760" x="30" y="540" as="geometry" />
         </mxCell>
-        <mxCell id="l1" parent="1" style="swimlane;horizontal=1;startSize=50;fillColor=#1a1a2e;strokeColor=#7c3aed;fontColor=#a78bfa;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;labelBackgroundColor=none;swimlaneFillColor=#A9C4EB;" value="&lt;div&gt;&lt;b&gt;ПЕРСОНАЛЬНАЯ или многопользовательская контекстная/контентная БД, Hybryd RAG&lt;/b&gt;&lt;/div&gt;&lt;b&gt;LAYER 1 — INTEGRATIONS (интеграции к клиентам которые использует пользователь)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;AI tools that connect to Context Manager — AI-инструменты подключаются к системе&lt;/font&gt;" vertex="1">
+        <mxCell id="l1" parent="1" style="swimlane;horizontal=1;startSize=50;fillColor=#1a1a2e;strokeColor=#7c3aed;fontColor=#a78bfa;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;labelBackgroundColor=none;swimlaneFillColor=#A9C4EB;" value="&lt;div&gt;&lt;b&gt;PERSONAL или multi-user конtextная/content БД, Hybryd RAG&lt;/b&gt;&lt;/div&gt;&lt;b&gt;LAYER 1 — INTEGRATIONS (integrations to clients the user uses)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;AI tools that connect to Context Manager — AI tools connect to the system&lt;/font&gt;" vertex="1">
           <mxGeometry height="160" width="810" x="30" y="20" as="geometry" />
         </mxCell>
-        <mxCell id="l1c0" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;Antigravity IDE&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;AI coding assistant (AI-помощник для кода)&lt;/font&gt;" vertex="1">
+        <mxCell id="l1c0" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;Antigravity IDE&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;AI coding assistant (AI code assistant)&lt;/font&gt;" vertex="1">
           <mxGeometry height="60" width="160" x="30" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="l1c1" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;VS Code / Continue&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Code editor with AI (редактор кода с AI) + локальные модели&lt;/font&gt;" vertex="1">
+        <mxCell id="l1c1" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;VS Code / Continue&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Code editor with AI (code editor with AI) + local models&lt;/font&gt;" vertex="1">
           <mxGeometry height="60" width="160" x="200" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="l1c2" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;Claude Code | OpenCode CLI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Terminal AI assistant (консольный AI)&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;+ локальные модели&lt;/font&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="l1c2" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;b&gt;Claude Code | OpenCode CLI&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Terminal AI assistant&lt;/font&gt;&lt;div&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;+ local models&lt;/font&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="60" width="180" x="380" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="l1c3" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;&lt;b&gt;Any MCP client (любой!)+НОВОСТЬ&lt;/b&gt;&lt;br&gt;&lt;/font&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Future/third-party AI tools (другие AI-программы)&lt;/font&gt;" vertex="1">
+        <mxCell id="l1c3" parent="l1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#2d1b69;strokeColor=#7c3aed;fontColor=#c4b5fd;fontSize=12;" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;&lt;b&gt;Any MCP client (any!)+NEW&lt;/b&gt;&lt;br&gt;&lt;/font&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Future/third-party AI tools (other AI tools)&lt;/font&gt;" vertex="1">
           <mxGeometry height="60" width="220" x="580" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="l2" parent="1" style="swimlane;horizontal=1;startSize=40;fillColor=#0f172a;strokeColor=#3b82f6;fontColor=#60a5fa;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;swimlaneFillColor=#D5E8D4;" value="&lt;b&gt;LAYER 2 — CONTEXT MANAGER CORE (ядро)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Receives, processes, stores, and searches context — обрабатывает запросы и управляет контекстом&lt;/font&gt;" vertex="1">
+        <mxCell id="l2" parent="1" style="swimlane;horizontal=1;startSize=40;fillColor=#0f172a;strokeColor=#3b82f6;fontColor=#60a5fa;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;swimlaneFillColor=#D5E8D4;" value="&lt;b&gt;LAYER 2 — CONTEXT MANAGER CORE (core)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Receives, processes, stores, and searches context — handles requests and manages context&lt;/font&gt;" vertex="1">
           <mxGeometry height="170" width="810" x="30" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="l2c2" parent="l2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e3a5f;strokeColor=#3b82f6;fontColor=#93c5fd;fontSize=12;" value="&lt;b&gt;Fastify API Server (:3847)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;30+ commands · validation · logging (команд, проверка, журнал)&lt;/font&gt;" vertex="1">
+        <mxCell id="l2c2" parent="l2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e3a5f;strokeColor=#3b82f6;fontColor=#93c5fd;fontSize=12;" value="&lt;b&gt;Fastify API Server (:3847)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;30+ commands · validation · logging&lt;/font&gt;" vertex="1">
           <mxGeometry height="64" width="340" x="430" y="45" as="geometry" />
         </mxCell>
-        <mxCell id="l2c0" parent="l2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e3a5f;strokeColor=#3b82f6;fontColor=#93c5fd;fontSize=12;" value="&lt;b&gt;MCP Adapters (адаптеры)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Connection handlers — stdio + HTTP :8770 (обработчики подключений)&lt;/font&gt;" vertex="1">
+        <mxCell id="l2c0" parent="l2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1e3a5f;strokeColor=#3b82f6;fontColor=#93c5fd;fontSize=12;" value="&lt;b&gt;MCP Adapters&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Connection handlers — stdio + HTTP :8770&lt;/font&gt;" vertex="1">
           <mxGeometry height="64" width="240" x="50" y="58" as="geometry" />
         </mxCell>
-        <mxCell id="l3" parent="1" style="swimlane;horizontal=1;startSize=40;fillColor=#052e16;strokeColor=#10b981;fontColor=#34d399;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;swimlaneFillColor=#E1D5E7;" value="&lt;b&gt;LAYER 3 — STORAGE &amp;amp; ML (хранилища и ML)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Text database + meaning converter + vector database — БД текста, преобразователь смысла, БД векторов&lt;/font&gt;" vertex="1">
+        <mxCell id="l3" parent="1" style="swimlane;horizontal=1;startSize=40;fillColor=#052e16;strokeColor=#10b981;fontColor=#34d399;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;swimlaneFillColor=#E1D5E7;" value="&lt;b&gt;LAYER 3 — STORAGE &amp;amp; ML (storage & ML)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;color:#999&quot;&gt;Text database + meaning converter + vector database — text DB, meaning converter, vector DB&lt;/font&gt;" vertex="1">
           <mxGeometry height="190" width="810" x="30" y="350" as="geometry" />
         </mxCell>
-        <mxCell id="e8" edge="1" parent="l3" source="l3c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#f59e0b;fontColor=#FF33FF;" target="l3c1" value="3. store vector (сохранить вектор)">
+        <mxCell id="e8" edge="1" parent="l3" source="l3c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#f59e0b;fontColor=#FF33FF;" target="l3c1" value="3. store vector (store vector)">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="660" y="50" />
@@ -42,7 +42,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e7" edge="1" parent="l3" source="l3c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#f59e0b;fontColor=#FF33FF;" target="l3c2" value="2. convert to meaning (преобразовать в смысл)">
+        <mxCell id="e7" edge="1" parent="l3" source="l3c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#f59e0b;fontColor=#FF33FF;" target="l3c2" value="2. convert to meaning (convert to meaning)">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="90" y="180" />
@@ -50,7 +50,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e9" edge="1" parent="l3" source="l3c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#10b981;fontColor=#34d399;dashed=1;" target="l3c1" value="auto-sync (автосинхронизация: одинаковые данные в разных форматах)">
+        <mxCell id="e9" edge="1" parent="l3" source="l3c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#10b981;fontColor=#34d399;dashed=1;" target="l3c1" value="auto-sync (same data in different formats)">
           <mxGeometry relative="1" x="0.0028" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
@@ -59,13 +59,13 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="l3c2" parent="l3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#422006;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=12;" value="&lt;b&gt;Embedder -&amp;nbsp;&lt;/b&gt;&lt;b&gt;TEI (Linux)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Meaning converter (преобразователь)&lt;br&gt;multilingual-e5-small · ONNX · 40 MB · ~15ms&lt;/font&gt;" vertex="1">
+        <mxCell id="l3c2" parent="l3" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#422006;strokeColor=#f59e0b;fontColor=#fcd34d;fontSize=12;" value="&lt;b&gt;Embedder -&amp;nbsp;&lt;/b&gt;&lt;b&gt;TEI (Linux)&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Meaning converter (converter)&lt;br&gt;multilingual-e5-small · ONNX · 40 MB · ~15ms&lt;/font&gt;" vertex="1">
           <mxGeometry height="80" width="200" x="580" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="l3c0" parent="l3" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#064e3b;strokeColor=#10b981;fontColor=#6ee7b7;fontSize=12;" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Text DB (БД текста)&lt;br&gt;context_db · tsvector · GIN index · 526 rows&lt;/font&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="l3c0" parent="l3" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#064e3b;strokeColor=#10b981;fontColor=#6ee7b7;fontSize=12;" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Text DB (text DB)&lt;br&gt;context_db · tsvector · GIN index · 526 rows&lt;/font&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="80" width="220" x="30" y="60" as="geometry" />
         </mxCell>
-        <mxCell id="l3c1" parent="l3" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#4C0099;strokeColor=#10b981;fontColor=#6ee7b7;fontSize=12;" value="&lt;b&gt;Qdrant | Vector DB&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Vector DB (БД смыслов/векторов)&lt;br&gt;1,336 points · 384d · Cosine&lt;/font&gt;&lt;/div&gt;" vertex="1">
+        <mxCell id="l3c1" parent="l3" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#4C0099;strokeColor=#10b981;fontColor=#6ee7b7;fontSize=12;" value="&lt;b&gt;Qdrant | Vector DB&lt;/b&gt;&lt;div&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;font-size: 10px; color: rgb(153, 153, 153);&quot;&gt;Vector DB (vector DB)&lt;br&gt;1,336 points · 384d · Cosine&lt;/font&gt;&lt;/div&gt;" vertex="1">
           <mxGeometry height="80" width="220" x="310" y="62" as="geometry" />
         </mxCell>
         <mxCell id="e5" edge="1" parent="1" source="l2c0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#3b82f6;fontColor=#60a5fa;startArrow=classic;startFill=1;" target="l2c2" value="forwards to API :3847">
@@ -76,7 +76,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="e6" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#10b981;fontColor=#34d399;startArrow=classic;startFill=1;exitX=0.156;exitY=1.018;exitDx=0;exitDy=0;exitPerimeter=0;" target="l3c0" value="1. save/read text (сохранить/вернуть текст)">
+        <mxCell id="e6" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#10b981;fontColor=#34d399;startArrow=classic;startFill=1;exitX=0.156;exitY=1.018;exitDx=0;exitDy=0;exitPerimeter=0;" target="l3c0" value="1. save/read text (save/return text)">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="513" y="320" />
@@ -85,7 +85,7 @@
             <mxPoint x="520" y="310" as="sourcePoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c1GivEdQLBNw5b5OzwY-4" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#34d399;startArrow=classic;startFill=1;exitX=0.465;exitY=0.982;exitDx=0;exitDy=0;exitPerimeter=0;" target="l3c1" value="1. ask/read vector (читать)+ID">
+        <mxCell id="1c1GivEdQLBNw5b5OzwY-4" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#34d399;startArrow=classic;startFill=1;exitX=0.465;exitY=0.982;exitDx=0;exitDy=0;exitPerimeter=0;" target="l3c1" value="1. ask/read vector (read)+ID">
           <mxGeometry relative="1" x="-0.0171" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
@@ -96,7 +96,7 @@
             <mxPoint x="190" y="420" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c1GivEdQLBNw5b5OzwY-5" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#60a5fa;startArrow=classic;startFill=1;" target="l3c2" value="конвертирует текст запроса&lt;div&gt;в вектор (384 числа)&lt;/div&gt;">
+        <mxCell id="1c1GivEdQLBNw5b5OzwY-5" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#60a5fa;startArrow=classic;startFill=1;" target="l3c2" value="converts text request&lt;div&gt;into a vector (384 numbers)&lt;/div&gt;">
           <mxGeometry relative="1" x="-0.0169" y="10" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
@@ -107,7 +107,7 @@
             <mxPoint x="800" y="330" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c1GivEdQLBNw5b5OzwY-6" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#60a5fa;startArrow=classic;startFill=1;" target="l3c0" value="дублирует запрос ID,&lt;div&gt;получает текстовые данные&lt;/div&gt;">
+        <mxCell id="1c1GivEdQLBNw5b5OzwY-6" edge="1" parent="1" source="l2c2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=9;strokeColor=#9933FF;fontColor=#60a5fa;startArrow=classic;startFill=1;" target="l3c0" value="duplicates request ID,&lt;div&gt;receives text data&lt;/div&gt;">
           <mxGeometry relative="1" x="-0.0169" y="10" as="geometry">
             <mxPoint as="offset" />
             <Array as="points">
@@ -150,7 +150,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="1c1GivEdQLBNw5b5OzwY-7" parent="1" style="text;html=1;fontSize=10;fontColor=#333333;align=left;fillColor=none;strokeColor=none;whiteSpace=wrap;labelBackgroundColor=#D5E8D4;labelBorderColor=#FFD966;" value="&lt;div&gt;Context Manager - 10 инструментов (расширяется на кастомные инструменты + шифрование):&amp;nbsp;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Команда&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Что делает&lt;/div&gt;&lt;div&gt;cm_save_br&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Сохранить кратко — авто-саммари беседы/контекста (200-300 символов)&lt;/div&gt;&lt;div&gt;cm_save_im&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Сохранить важное — структурированная запись по темам (до 3K символов)&amp;nbsp;&amp;nbsp;&lt;/div&gt;&lt;div&gt;cm_save_fl&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Сохранить полностью — весь лог сессии + (документ) дословно&lt;/div&gt;&lt;div&gt;cm_search&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Поиск по смыслу — найти похожие разговоры, даже если слова разные&lt;/div&gt;&lt;div&gt;cm_query&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Поиск с фильтрами — по дате, агенту, режиму сохранения&lt;/div&gt;&lt;div&gt;cm_cross&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Поиск в контексте другого агента — один AI смотрит записи другого&lt;/div&gt;&lt;div&gt;cm_agents&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Список всех AI-агентов с количеством их записей&lt;/div&gt;&lt;div&gt;cm_stats&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Статистика — сколько записей, когда последняя активность&lt;/div&gt;&lt;div&gt;cm_export&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Экспорт сессии в формате JSON — выгрузить для анализа&lt;/div&gt;&lt;div&gt;cm_help&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Показать список всех команд и их описание&lt;/div&gt;" vertex="1">
+        <mxCell id="1c1GivEdQLBNw5b5OzwY-7" parent="1" style="text;html=1;fontSize=10;fontColor=#333333;align=left;fillColor=none;strokeColor=none;whiteSpace=wrap;labelBackgroundColor=#D5E8D4;labelBorderColor=#FFD966;" value="&lt;div&gt;Context Manager - 10 tools (extensible на custom tools + encryption):&amp;nbsp;&amp;nbsp;&lt;/div&gt;&lt;div&gt;Command&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Что does&lt;/div&gt;&lt;div&gt;cm_save_br&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Save brief — auto-summary conversation/конtextа (200-300 characters)&lt;/div&gt;&lt;div&gt;cm_save_im&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Save important — structured record по by topic (до 3K characters)&amp;nbsp;&amp;nbsp;&lt;/div&gt;&lt;div&gt;cm_save_fl&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Save full — full session log + (document) verbatim&lt;/div&gt;&lt;div&gt;cm_search&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Search by meaning — find similar conversations, even if words are different&lt;/div&gt;&lt;div&gt;cm_query&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Search с filters — по by date, by agent, by mode save&lt;/div&gt;&lt;div&gt;cm_cross&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Search в конtextе another's agent — one AI reads records another's&lt;/div&gt;&lt;div&gt;cm_agents&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;List all AI-agents с count их records&lt;/div&gt;&lt;div&gt;cm_stats&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Statistics — how many records, when last activity&lt;/div&gt;&lt;div&gt;cm_export&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;Export session в format JSON — export для analysis&lt;/div&gt;&lt;div&gt;cm_help&lt;span style=&quot;white-space:pre&quot;&gt;&#x9;&lt;/span&gt;&amp;nbsp; &amp;nbsp; &amp;nbsp; &amp;nbsp; Show list all commands and their description&lt;/div&gt;" vertex="1">
           <mxGeometry height="160" width="460" x="40" y="562" as="geometry" />
         </mxCell>
       </root>

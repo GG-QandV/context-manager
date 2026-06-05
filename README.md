@@ -93,10 +93,17 @@ Attribution must be preserved as defined in [NOTICE](./NOTICE).
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+## Presentation
+
+An interactive HTML presentation explaining the Context Manager architecture, features, and MCP integration is available in `docs/cm-presentation/`:
+
+- **Dark theme** — [`docs/cm-presentation/cm-presentation.html`](docs/cm-presentation/cm-presentation.html)
+- **Light theme** — [`docs/cm-presentation/cm-presentation-light.html`](docs/cm-presentation/cm-presentation-light.html)
+
 > [!WARNING]
 > **Disclaimer**: This software is provided "as is", without warranty of any kind. Users use this software at their own risk.
 
 ---
 
-**Maintained by:** GG-QandV  
+**Maintained by:** N  
 **Part of:** [Context-Manager Infrastructure](../README.md)
