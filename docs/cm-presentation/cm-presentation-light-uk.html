@@ -971,12 +971,20 @@
 
 <!-- SLIDE 10: END -->
 <section class="slide" id="end">
-  <div class="badge">Context Manager v2.0</div>
+  <div class="badge">Context Manager v2.2.1</div>
   <h1>Дякую</h1>
   <p>Постійна пам'ять для AI-помічників.<br>PostgreSQL + Qdrant + MCP.</p>
   <p style="margin-top: 24px; color: #6b7280; font-size: 14px; max-width: 600px; margin-left: auto; margin-right: auto;">
     Інструмент, який допомагає AI пам'ятати — щоб вам не доводилося повторюватись.
   </p>
+  <div style="margin-top: 36px; max-width: 900px; margin-left: auto; margin-right: auto;">
+    <table class="compat-table">
+      <tr><th>Аспект</th><th>Опис</th><th>macOS</th><th>Linux</th><th>Windows</th></tr>
+      <tr><td>Docker Desktop</td><td>Платформа контейнерів</td><td><span class="status-ok">✅ HyperKit</span></td><td><span class="status-ok">✅ Native</span></td><td><span class="status-warn">⚠️ Потрібен VT-x/WSL2</span></td></tr>
+      <tr><td>TEI Embedder (AI модель)</td><td>Модель перетворення сенсу</td><td><span class="status-ok">✅ CPU</span></td><td><span class="status-ok">✅</span></td><td><span class="status-warn">❌ Тільки Docker</span></td></tr>
+      <tr><td>Шляхи конфігів</td><td>Де зберігаються налаштування</td><td>~/Library/Application Support/</td><td>~/.config/</td><td>%APPDATA%</td></tr>
+    </table>
+  </div>
   <div style="margin-top: 48px;">
     <div style="display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
       <span style="color: #6b7280; font-size: 14px;"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,76H129.66L101.17,47.52A11.9,11.9,0,0,0,92.69,44H40A12,12,0,0,0,28,56V200.62A11.4,11.4,0,0,0,39.38,212H216.89A11.12,11.12,0,0,0,228,200.89V88A12,12,0,0,0,216,76ZM36,56a4,4,0,0,1,4-4H92.69a4,4,0,0,1,2.82,1.17L118.34,76H36ZM220,200.89a3.12,3.12,0,0,1-3.11,3.11H39.38A3.39,3.39,0,0,1,36,200.62V84H216a4,4,0,0,1,4,4Z"/></svg> context-manager/</span>
