@@ -3,9 +3,14 @@ import { config } from './config';
 import { postgresService } from './services/postgres.service';
 // 1. ЗАМЕНА: импортируем qdrantService вместо weaviateService
 import { qdrantService } from './services/qdrant.service'; 
+import { migrateLegacyConfig, migrateLegacyMcp } from './config/migration';
 
 async function start() {
   try {
+    // Миграция конфига со старого пути ~/.iflow/
+    await migrateLegacyConfig();
+    await migrateLegacyMcp();
+
     // 2. ЗАМЕНА: Инициализация схемы Qdrant
     console.log('Initializing Qdrant collection...');
     await qdrantService.initializeSchema(); 

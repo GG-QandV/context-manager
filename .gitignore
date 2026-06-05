@@ -12,8 +12,19 @@ node_modules/
 # Archives / Backups
 *.tar.gz
 *.backup*
+*.bkp
 *.old
+*.ts.[0-9]
+.*.bkp
 
 # IDE
 .vscode/
+
+# Private/dev docs (не для публичного репо)
+docs/HVOSTY_FIX_PLAN.md
+docs/INSTALL_PIPELINE_CHECKLIST.md
+docs/cm-presentation/TODO.md
+docs/cm-presentation/icons-browser.html
+docs/cm-presentation/icons-draft.html
+docs/cm-presentation/cm-presentation-uk_old.html
 

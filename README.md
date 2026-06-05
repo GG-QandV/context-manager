@@ -44,9 +44,17 @@ Detailed endpoint documentation can be found in `src/schemas/`.
 
 ### Core Endpoints:
 
-- `POST /v1/context`: Save new context entry.
-- `GET /v1/context/search`: Semantic search over stored context.
+- `POST /api/context/save`: Save new context entry.
+- `GET /api/context/session/:sessionId`: Retrieve context by session ID.
+- `POST /api/context/search`: Full-text search over stored context (PostgreSQL).
+- `POST /api/context/semantic-search`: Semantic search over stored context (Qdrant).
+- `POST /api/context/hybrid-search`: Combined full-text + semantic search.
 - `GET /health`: System health status.
+- `GET /api/context/stats`: Database statistics.
+- `GET /api/context/agents`: List all known agents.
+- `GET /api/context/export`: Export contexts (by session/agent).
+- `GET /api/context/config`: Read config file.
+- `POST /api/context/config`: Update config file.
 - `POST /api/context/query`: Low-level SQL-based query interface.
 
 ## Model Context Protocol (MCP) Tools

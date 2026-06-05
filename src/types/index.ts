@@ -75,6 +75,41 @@ export interface PaginatedResponse<T> {
   };
 }
 
-export interface ContextDataWithTypes extends SaveContextBody {
-  content_types?: string[];
+export interface SemanticSearchResult {
+  sessionId: string;
+  contextType: string;
+  content: string;
+  summary: string;
+  tags: string[];
+  timestamp: string;
+  projectId: string;
+  syncId: string;
+  logicalSection?: string;
+  module?: string;
+  techTags: string[];
+  phase?: string;
+  priority?: string;
+  deploymentStage?: string;
+  marketPhase?: string;
+  certainty: number;
+  agent?: string;
+  score: number;
+}
+
+export interface QdrantFilter {
+  key: string;
+  match: { value: string };
+}
+
+export interface ContextMetadata {
+  agent?: string;
+  mode?: 'full' | 'brief' | 'important';
+  topics?: string;
+}
+
+export function getMeta<K extends keyof ContextMetadata>(
+  metadata: Record<string, unknown>,
+  field: K
+): ContextMetadata[K] | undefined {
+  return metadata[field] as ContextMetadata[K] | undefined;
 }

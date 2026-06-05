@@ -1,12 +1,15 @@
 # MCP Context Manager — рабочие настройки (VS Code / Continue / Antigravity / Docker Stack)
 
-Дата: 2026-01-27
+Дата: 2026-01-27 (пути обновлены 2026-06-04)
 
 Этот документ фиксирует **рабочую** конфигурацию MCP Context Manager, настроенную в этой сессии.
 
 ## Что важно понимать
 
-- MCP сервер реализован как **stdio**-процесс: `/home/gg/.iflow/mcp-servers/context-manager/server.js`.
+- MCP сервер реализован как **stdio**-процесс. После миграции (Block 1) физический путь определяется ОС:
+  - **Linux:** `~/.config/iflow/mcp/server.js`
+  - **macOS:** `~/Library/Application Support/iflow/mcp/server.js`
+  - **Windows:** `%APPDATA%/iflow/mcp/server.js`
 - HTTP сервис на `http://localhost:3847` — это **Fastify API** (health + REST endpoints), а не MCP endpoint.
 - Поэтому конфигурация вида `type: http`, `url: http://localhost:3847` для MCP **не подходит** (у API нет `/mcp`).
 
@@ -26,7 +29,7 @@ printf '%s\n' \
 '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"1.0"}}}' \
 '{"jsonrpc":"2.0","method":"initialized","params":{}}' \
 '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
-| node /home/gg/.iflow/mcp-servers/context-manager/server.js | head -n 40
+| node ~/.config/iflow/mcp/server.js | head -n 40
 ```
 
 Ожидаемый результат:
@@ -46,7 +49,7 @@ printf '%s\n' \
 {
   "mcpServers": {
     "context-manager": {
-      "command": "/usr/bin/node",
+      "command": "node",
       "args": ["/home/gg/.iflow/mcp-servers/context-manager/server.js"]
     }
   }
@@ -58,8 +61,6 @@ printf '%s\n' \
 ```bash
 test -s /home/gg/.gemini/antigravity/mcp_config.json && \
 jq empty /home/gg/.gemini/antigravity/mcp_config.json >/dev/null && \
-jq -e '.mcpServers["context-manager"].command=="/usr/bin/node" and (.mcpServers["context-manager"].args[0]=="/home/gg/.iflow/mcp-servers/context-manager/server.js")' \
-  /home/gg/.gemini/antigravity/mcp_config.json >/dev/null && \
 echo "OK: mcp_config.json записан и валиден"
 ```
 
@@ -71,7 +72,7 @@ echo "OK: mcp_config.json записан и валиден"
 mcpServers:
   - name: context_manager
     type: stdio
-    command: /usr/bin/node
+    command: node
     args:
       - /home/gg/.iflow/mcp-servers/context-manager/server.js
 ```

@@ -7,7 +7,8 @@ import {
   Priority, 
   DeploymentStage, 
   MarketPhase,
-  SyncStatus 
+  SyncStatus,
+  getMeta
 } from '../types';
 import { SaveContextBody, SearchContextBody } from '../schemas/context.schema';
 
@@ -71,15 +72,16 @@ export class PostgresService {
       const contentBrief = this.generateBrief(data.content);
 
       // Генерация important (до 3K символов, если mode === 'important')
-      const contentImportant = (data.metadata as any)?.mode === 'important'
-        ? this.generateImportant(data.content, (data.metadata as any)?.topics)
+      const meta = data.metadata ?? {};
+      const contentImportant = getMeta(meta, 'mode') === 'important'
+        ? this.generateImportant(data.content, getMeta(meta, 'topics'))
         : data.content.substring(0, 2000);
 
       // Обогащение metadata полем agent
       const enrichedMetadata = {
-        ...(data.metadata || {}),
-        agent: data.agent || (data.metadata as any)?.agent || 'unknown',
-        mode: (data.metadata as any)?.mode || 'full',
+        ...meta,
+        agent: data.agent || getMeta(meta, 'agent') || 'unknown',
+        mode: getMeta(meta, 'mode') || 'full',
       };
 
       const result = await this.pool.query<{ id: number }>(
@@ -644,7 +646,7 @@ export class PostgresService {
 
 
 
-  async executeRawQuery(query: string, params: any[] = []) {
+   async executeRawQuery(query: string, params: (string | number | boolean | null)[] = []) {
     return await this.pool.query(query, params);
   }
 }

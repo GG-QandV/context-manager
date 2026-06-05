@@ -1,0 +1,9 @@
+{
+  "servers": {
+    "context-manager": {
+      "type": "stdio",
+      "command": "{{NODE_PATH}}",
+      "args": ["{{MCP_SERVER_PATH}}/server.js"]
+    }
+  }
+}

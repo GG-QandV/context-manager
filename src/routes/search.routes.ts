@@ -1,6 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import { postgresService } from '../services/postgres.service';
-// ЗАМЕНА ТУТ:
 import { qdrantService } from '../services/qdrant.service';
 import {
   SearchContextBodySchema,
@@ -8,6 +7,7 @@ import {
   SemanticSearchBodySchema,
   SemanticSearchBody,
 } from '../schemas/context.schema';
+import type { ContextRecord } from '../types';
 
 export async function searchRoutes(fastify: FastifyInstance) {
   // Full-text search (PostgreSQL)
@@ -64,40 +64,39 @@ export async function searchRoutes(fastify: FastifyInstance) {
       const [textResults, semanticResults] = await Promise.all([
         postgresService.searchContexts({ 
           query, 
-          filters: filters as any, 
+          filters: filters as SearchContextBody['filters'], 
           limit 
         }),
-        // ЗАМЕНА ТУТ:
         qdrantService.semanticSearch(request.body),
       ]);
 
       // Merge and deduplicate by sync_id
       const seen = new Set<string>();
-      const merged: any[] = [];
+      const merged: Array<Record<string, unknown> & { source: string; score: number }> = [];
 
       // Add semantic results first (higher relevance)
       for (const result of semanticResults) {
-        // У Qdrant результат может быть в camelCase (syncId) или snake_case (sync_id)
-        // В нашем qdrant.service.ts мы мапим это в syncId
-        const id = result.syncId || result.sync_id;
+        const r = result as unknown as Record<string, unknown>;
+        const id = String(r.syncId ?? r.sync_id ?? '');
         if (id && !seen.has(id)) {
           seen.add(id);
           merged.push({
             ...result,
             source: 'semantic',
-            score: result.certainty || result.score,
+            score: (r.certainty as number) ?? (r.score as number) ?? 0,
           });
         }
       }
 
       // Add text search results
       for (const result of textResults) {
-        if (!seen.has(result.sync_id)) {
-          seen.add(result.sync_id);
+        const r = result as ContextRecord & { rank?: number };
+        if (!seen.has(r.sync_id)) {
+          seen.add(r.sync_id);
           merged.push({
-            ...result,
+            ...r,
             source: 'text',
-            score: (result as any).rank || 0,
+            score: r.rank ?? 0,
           });
         }
       }

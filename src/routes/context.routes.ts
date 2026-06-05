@@ -3,6 +3,8 @@ import { contentDetector } from '../services/contentDetector.service';
 import { postgresService } from '../services/postgres.service';
 import { qdrantService } from '../services/qdrant.service';
 import { timeParserService } from '../services/timeParser.service';
+import { readFile, writeFile, mkdir } from 'fs/promises';
+import { getConfigDir, getConfigFilePath } from '../config/paths';
 import {
   SaveContextBodySchema,
   SaveContextBody,
@@ -501,23 +503,35 @@ export async function contextRoutes(fastify: FastifyInstance) {
     return { success: true, results: result.rows, count: result.rowCount };
   });
 
-  fastify.get('/api/context/config', async (request: any, reply: any) => {
-    const fs = await import('fs/promises');
+  fastify.get('/api/context/config', async (_request: any, reply: any) => {
     try {
-      const cfg = JSON.parse(await fs.readFile(`${process.env.HOME}/.iflow/context-manager-config.json`, 'utf8'));
+      const cfg = JSON.parse(await readFile(getConfigFilePath(), 'utf8'));
       return { success: true, config: cfg };
-    } catch { reply.code(404); return { success: false }; }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      reply.code(404);
+      return { success: false, error: `Config not found: ${message}` };
+    }
   });
 
   fastify.post('/api/context/config', async (request: any, reply: any) => {
-    const fs = await import('fs/promises');
-    const path = `${process.env.HOME}/.iflow/context-manager-config.json`;
     try {
-      const cfg = JSON.parse(await fs.readFile(path, 'utf8'));
-      Object.assign(cfg, request.body);
-      await fs.writeFile(path, JSON.stringify(cfg, null, 2));
+      const path = getConfigFilePath();
+      await mkdir(getConfigDir(), { recursive: true });
+
+      let cfg: Record<string, unknown> = {};
+      try {
+        cfg = JSON.parse(await readFile(path, 'utf8'));
+      } catch { /* file doesn't exist yet, start fresh */ }
+
+      Object.assign(cfg, request.body ?? {});
+      await writeFile(path, JSON.stringify(cfg, null, 2), 'utf8');
       return { success: true, config: cfg };
-    } catch { reply.code(500); return { success: false }; }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      reply.code(500);
+      return { success: false, error: `Failed to write config: ${message}` };
+    }
   });
   // --- MISSING ENDPOINTS: stats, agents, export ---
 

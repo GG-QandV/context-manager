@@ -18,6 +18,6 @@ RUN npm run build
 # Remove dev dependencies to reduce image size
 RUN npm prune --production
 
-EXPOSE 3001
+EXPOSE 3847
 
 CMD ["node", "dist/index.js"]

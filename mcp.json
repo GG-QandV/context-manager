@@ -2,8 +2,8 @@
   "servers": {
     "context-manager": {
       "type": "stdio",
-      "command": "/usr/bin/node",
-      "args": ["/home/gg/.iflow/mcp-servers/context-manager/server.js"]
+      "command": "node",
+      "args": ["./mcp/server.js"]
     }
   }
 }

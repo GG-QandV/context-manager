@@ -1,7 +1,7 @@
 import { QdrantClient } from '@qdrant/js-client-rest';
 import { config } from '../config';
 import { embeddingService } from './embedding.service';
-import { ContextRecord } from '../types';
+import { ContextRecord, SemanticSearchResult, QdrantFilter, getMeta } from '../types';
 import { SaveContextBody, SemanticSearchBody } from '../schemas/context.schema';
 import crypto from 'crypto';
 
@@ -60,7 +60,7 @@ class QdrantService {
       id: crypto.randomUUID(),
       vector: chunk.vector,
       payload: {
-        agent: data.agent || (data.metadata as any)?.agent || null,
+        agent: data.agent || getMeta(data.metadata ?? {}, 'agent') || null,
         sessionId: data.sessionId,
         contextType: data.contextType,
         content: chunk.text, // Теперь тут кусок текста
@@ -83,7 +83,7 @@ class QdrantService {
     // DEBUG: Check payload before upsert
     console.log('[QDRANT DEBUG] Agent in payload:', {
       rawAgent: data.agent,
-      metadataAgent: (data.metadata as any)?.agent,
+      metadataAgent: getMeta(data.metadata ?? {}, 'agent'),
       firstPointPayload: points[0]?.payload,
       pointsCount: points.length
     });
@@ -109,7 +109,7 @@ class QdrantService {
           summary: record.summary,
           tags: record.tags,
           metadata: record.metadata,
-          agent: (record.metadata as any)?.agent,
+          agent: getMeta(record.metadata ?? {}, 'agent'),
           projectId: record.project_id,
           logicalSection: record.logical_section ?? undefined,
           module: record.module ?? undefined,
@@ -132,13 +132,13 @@ class QdrantService {
     return { successful, failed };
   }
 
-  async semanticSearch(params: SemanticSearchBody): Promise<any[]> {
+  async semanticSearch(params: SemanticSearchBody): Promise<SemanticSearchResult[]> {
     const { query, filters, limit = 10 } = params;
 
     const queryVector = await embeddingService.getEmbedding(query);
 
     // Подготовка фильтров Qdrant
-    const mustFilters: any[] = [];
+    const mustFilters: QdrantFilter[] = [];
     if (filters?.logicalSection) mustFilters.push({ key: 'logicalSection', match: { value: filters.logicalSection } });
     if (filters?.module) mustFilters.push({ key: 'module', match: { value: filters.module } });
     if (filters?.projectId) mustFilters.push({ key: 'projectId', match: { value: filters.projectId } });
@@ -155,25 +155,25 @@ class QdrantService {
     });
 
     return results.map(hit => {
-      const p = hit.payload as any;
+      const p = (hit.payload ?? {}) as Record<string, unknown>;
       return {
-        sessionId: p?.sessionId || '',
-        contextType: p?.contextType || '',
-        content: p?.text || p?.content || '',
-        summary: p?.summary || '',
-        tags: p?.tags || [],
-        timestamp: p?.timestamp || '',
-        projectId: p?.projectId || '',
-        syncId: p?.syncId || '',
-        logicalSection: p?.logicalSection ?? undefined,
-        module: p?.module ?? undefined,
-        techTags: p?.techTags || [],
-        phase: p?.phase ?? undefined,
-        priority: p?.priority ?? undefined,
-        deploymentStage: p?.deploymentStage ?? undefined,
-        marketPhase: p?.marketPhase ?? undefined,
+        sessionId: String(p.sessionId ?? ''),
+        contextType: String(p.contextType ?? ''),
+        content: String(p.text || p.content || ''),
+        summary: String(p.summary ?? ''),
+        tags: (Array.isArray(p.tags) ? p.tags : []) as string[],
+        timestamp: String(p.timestamp ?? ''),
+        projectId: String(p.projectId ?? ''),
+        syncId: String(p.syncId ?? ''),
+        logicalSection: p.logicalSection != null ? String(p.logicalSection) : undefined,
+        module: p.module != null ? String(p.module) : undefined,
+        techTags: (Array.isArray(p.techTags) ? p.techTags : []) as string[],
+        phase: p.phase != null ? String(p.phase) : undefined,
+        priority: p.priority != null ? String(p.priority) : undefined,
+        deploymentStage: p.deploymentStage != null ? String(p.deploymentStage) : undefined,
+        marketPhase: p.marketPhase != null ? String(p.marketPhase) : undefined,
         certainty: (hit.score + 1) / 2,
-        agent: p?.agent ?? undefined,
+        agent: p.agent != null ? String(p.agent) : undefined,
         score: hit.score
       };
     });

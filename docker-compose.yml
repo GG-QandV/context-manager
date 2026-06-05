@@ -35,7 +35,7 @@ services:
     networks:
       - orchestrator-network
     volumes:
-      - /home/gg/orchestrator/models/embedding/multilingual-e5-small_Q8/onnx:/data:ro
+      - ${MODELS_DIR:-./models}/multilingual-e5-small_Q8/onnx:/data:ro
     environment:
       - RAYON_NUM_THREADS=4
       - OMP_NUM_THREADS=4
@@ -50,6 +50,25 @@ services:
       --max-concurrent-requests 16
       --max-batch-requests 8
       --auto-truncate
+    restart: unless-stopped
+
+  cm-mcp-adapter:
+    image: node:22-alpine
+    container_name: cm-mcp-adapter
+    working_dir: /app
+    volumes:
+      - ${MCP_DIR:-./mcp}:/app:ro
+    command: node cm_http_adapter.mjs
+    ports:
+      - "8770:8770"
+    environment:
+      - CM_API_BASE=http://context-manager:3847/api/context
+      - CM_MCP_PORT=8770
+    networks:
+      - orchestrator-network
+    depends_on:
+      - context-manager
+    mem_limit: 64m
     restart: unless-stopped
 
 networks:
