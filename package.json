@@ -2,6 +2,9 @@
   "name": "context-manager",
   "version": "2.1.1",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "description": "Context management service for iFlow CLI",
   "main": "dist/index.js",
   "scripts": {

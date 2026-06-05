@@ -11,6 +11,16 @@ The core orchestration service for managing AI Agent context, providing a bridge
 
 ## Setup & Installation
 
+### Windows 10/11 (One-Click Auto-Install)
+
+For a fully automated silent installation on Windows (installs Node, Python, PostgreSQL, Qdrant, ONNX Model, and registers background services), open **PowerShell as Administrator** and run:
+
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/YOUR_ORG/context-manager/main/scripts/install-native.ps1" -OutFile "$env:TEMP\install-native.ps1"; & "$env:TEMP\install-native.ps1"
+```
+
+*(Note: Replace `YOUR_ORG` with your actual GitHub organization or username before publishing.)*
+
 ### Environment Variables
 
 Create a `.env` file in this directory (refer to `.env.example` if available or the internal list):
@@ -37,6 +47,28 @@ npm run dev
 docker build -t context-manager .
 docker run -p 3847:3847 --env-file .env context-manager
 ```
+
+## Windows — настройка MCP
+
+После установки обязательно запустить генерацию MCP конфига:
+
+```powershell
+node scripts/init-mcp-config.mjs
+```
+
+Это создаёт `mcp.json` с абсолютным путём к `server.js`.  
+**Не использовать** `mcp.json` из репозитория напрямую — он содержит относительный путь  
+и работает только при запуске из директории проекта.
+
+### Подключение к IDE
+
+**Claude Desktop:**
+```powershell
+Copy-Item mcp.json "$env:APPDATA\Claude\claude_desktop_config.json"
+```
+
+**Cursor / VS Code MCP:**  
+Открыть Settings → MCP → указать путь из сгенерированного `mcp.json`.
 
 ## API Documentation
 

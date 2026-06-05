@@ -18,14 +18,14 @@ import os
 
 # ── Config ────────────────────────────────────────────────────────────
 PG_HOST = os.getenv("PG_HOST", "localhost")
-PG_PORT = int(os.getenv("PG_PORT", "5433"))
+PG_PORT = int(os.getenv("PG_PORT", "5432"))
 PG_DB   = os.getenv("PG_DB", "context_db")
 PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASS = os.getenv("PG_PASS", "")
 
 
 TEI_URL     = "http://localhost:8080"
-QDRANT_URL  = "http://localhost:6334"
+QDRANT_URL  = "http://localhost:6333"
 COLLECTION  = "DevelopmentContext"
 
 BATCH_SIZE  = 4   # stay under max-concurrent-requests 8

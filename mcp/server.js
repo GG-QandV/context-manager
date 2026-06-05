@@ -3,7 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { ListToolsRequestSchema, CallToolRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import axios from 'axios';
 
-const API_BASE = 'http://localhost:3847/api/context';
+const API_BASE = process.env.CM_API_BASE || 'http://localhost:3847/api/context';
 
 const server = new Server({ name: 'cm', version: '2.0.1' }, { capabilities: { tools: {} } });
 

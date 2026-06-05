@@ -28,3 +28,5 @@ docs/cm-presentation/icons-browser.html
 docs/cm-presentation/icons-draft.html
 docs/cm-presentation/cm-presentation-uk_old.html
 
+models/
+__pycache__/
