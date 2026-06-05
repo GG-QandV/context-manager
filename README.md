@@ -127,10 +127,13 @@ Attribution must be preserved as defined in [NOTICE](./NOTICE).
 
 ## Presentation
 
-An interactive HTML presentation explaining the Context Manager architecture, features, and MCP integration is available in `docs/cm-presentation/`:
+An interactive HTML presentation explaining the Context Manager architecture, features, and MCP integration:
 
-- **Dark theme** — [`docs/cm-presentation/cm-presentation.html`](docs/cm-presentation/cm-presentation.html)
-- **Light theme** — [`docs/cm-presentation/cm-presentation-light.html`](docs/cm-presentation/cm-presentation-light.html)
+- **Dark theme** — [cm-presentation.html](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/main/docs/cm-presentation/cm-presentation.html)
+- **Light theme** — [cm-presentation-light.html](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/main/docs/cm-presentation/cm-presentation-light.html)
+
+> HTML-файлы лежат в `docs/cm-presentation/`. GitHub не рендерит `.html` как страницы —  
+> ссылки выше используют `htmlpreview.github.io` для корректного отображения.
 
 > [!WARNING]
 > **Disclaimer**: This software is provided "as is", without warranty of any kind. Users use this software at their own risk.
