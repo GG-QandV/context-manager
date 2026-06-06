@@ -77,23 +77,6 @@ jobs:
       # -----------------------------------------------------------------------
       - name: Prepare installer source structure
         run: |
-          # app\ — скомпилированный проект
-          New-Item -ItemType Directory -Force -Path "app\dist" | Out-Null
-          New-Item -ItemType Directory -Force -Path "app\mcp"  | Out-Null
-          Copy-Item "dist\*"       "app\dist\"   -Recurse -Force
-          Copy-Item "mcp\*"        "app\mcp\"    -Recurse -Force
-          Copy-Item ".env.windows" "app\.env.windows" -Force
-          Copy-Item "package.json" "app\"        -Force
-
-          # embed\ — Python embedder
-          New-Item -ItemType Directory -Force -Path "embed" | Out-Null
-          Copy-Item "embed\*" "embed\" -Recurse -Force
-
-          # scripts\
-          New-Item -ItemType Directory -Force -Path "scripts" | Out-Null
-          Copy-Item "scripts\change-pg-password.ps1" "scripts\" -Force
-
-          # installer\ — выходная папка
           New-Item -ItemType Directory -Force -Path "installer" | Out-Null
         shell: pwsh
 
