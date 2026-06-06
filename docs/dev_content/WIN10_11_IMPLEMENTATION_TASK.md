@@ -1,7 +1,7 @@
 # Задание: Windows 10/11 Native Implementation
 
 > Основание: аудит кода 2026-06-05 + спеки v1.0  
-> Спеки: SPEC_ONNX_EMBEDDER.md, WIN10_ARCHITECTURE_DESIGN.md, WIN10_INSTALL_GUIDE.md, GAPS_AUDIT.md
+> Спеки: SPEC_ONNX_EMBEDDER.md, WIN10_ARCHITECTURE_DESIGN.md, WIN10_11_INSTALL_GUIDE.md, GAPS_AUDIT.md
 
 ---
 
@@ -247,4 +247,4 @@ TASK-08 (package.json)        → 1 строка
 1. `docs/GAPS_AUDIT.md` — сначала: что реально сломано vs HVOSTY
 2. `docs/SPEC_ONNX_EMBEDDER.md` — техническая спека embedder'а
 3. `docs/WIN10_ARCHITECTURE_DESIGN.md` — полная архитектура + nssm конфиги
-4. `docs/WIN10_INSTALL_GUIDE.md` — пошаговый гайд (для install-native.ps1)
+4. `docs/WIN10_11_INSTALL_GUIDE.md` — пошаговый гайд (для install-native.ps1)

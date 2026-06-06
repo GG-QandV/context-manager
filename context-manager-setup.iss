@@ -121,6 +121,11 @@ Source: "scripts\change-pg-password.ps1"; DestDir: "{app}\scripts"; Flags: ignor
 [Icons]
 ; Деинсталлятор в меню «Программы» -------------------------------------------
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"
+; Автозагрузка системного трея для пользователя -----------------------------
+Name: "{userstartup}\{#AppName} Tray"; \
+  Filename: "{app}\embed\.venv\Scripts\pythonw.exe"; \
+  Parameters: """{app}\app\mcp\integration\tray_pyqt.py"""; \
+  Comment: "Start Context Manager Tray"
 
 [Code]
 // ============================================================================

@@ -1,4 +1,4 @@
-# WIN10 Test Specification — Context Manager Native Stack
+# WIN10_11 Test Specification — Context Manager Native Stack
 
 > Версия: 1.0 | Дата: 2026-06-05
 > Основание: GAPS_AUDIT.md, SPEC_ONNX_EMBEDDER.md, WIN10_ARCHITECTURE_DESIGN.md
@@ -320,7 +320,7 @@ $base = "http://127.0.0.1:3847/api/context"
 $s1 = Invoke-RestMethod -Method Post -Uri $base `
     -Body '{
         "type": "work",
-        "brief": "WIN10 test — embeddings integration",
+        "brief": "WIN10_11 test — embeddings integration",
         "tags": ["integration", "windows", "onnx"],
         "content": "Протестировали ONNX embedder на Windows 10. Все слои прошли."
     }' `

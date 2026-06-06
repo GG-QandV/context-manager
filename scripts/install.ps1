@@ -58,6 +58,37 @@ if ($Docker) {
     docker compose up -d
 }
 
+# --- Windows Tray Auto-start Setup ---
+if ($env:OS -like "*Windows*") {
+    Write-Host "`nSetting up System Tray auto-start for Windows..." -ForegroundColor Yellow
+    try {
+        $pythonPath = (Get-Command python -ErrorAction SilentlyContinue).Source
+        if ($pythonPath) {
+            $venvDir = Join-Path $ProjectDir "embed\.venv"
+            if (-not (Test-Path $venvDir)) {
+                Write-Host "  Creating Python venv..." -ForegroundColor Yellow
+                & python -m venv $venvDir
+            }
+            Write-Host "  Installing requirements..." -ForegroundColor Yellow
+            $pipPath = Join-Path $venvDir "Scripts\pip.exe"
+            & $pipPath install -r (Join-Path $ProjectDir "embed\requirements.txt") --quiet
+            
+            # Create startup shortcut
+            Write-Host "  Creating Startup shortcut..." -ForegroundColor Yellow
+            $startupDir = Join-Path $env:APPDATA "Microsoft\Windows\Start Menu\Programs\Startup"
+            $WshShell = New-Object -ComObject WScript.Shell
+            $Shortcut = $WshShell.CreateShortcut((Join-Path $startupDir "Context Manager Tray.lnk"))
+            $Shortcut.TargetPath = Join-Path $venvDir "Scripts\pythonw.exe"
+            $Shortcut.Arguments = """$(Join-Path $ProjectDir "mcp\integration\tray_pyqt.py")"""
+            $Shortcut.WorkingDirectory = $ProjectDir
+            $Shortcut.Save()
+            Write-Host "  Tray auto-start setup complete ✓" -ForegroundColor Green
+        }
+    } catch {
+        Write-Warning "Failed to setup system tray auto-start: $_"
+    }
+}
+
 # --- Summary ---
 Write-Host "`n=== Install complete ===" -ForegroundColor Cyan
 Write-Host ""

@@ -12,7 +12,8 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "typecheck": "tsc --noEmit",
-    "test": "TS_NODE_PROJECT=tsconfig.test.json node --require ts-node/register --test tests/*.test.ts"
+    "test": "TS_NODE_PROJECT=tsconfig.test.json node --require ts-node/register --test tests/*.test.ts",
+    "tunnel:start": "python3 mcp/integration/tunnel_manager.py"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
