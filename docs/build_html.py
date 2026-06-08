@@ -75,4 +75,4 @@ def convert_md_to_html(md_path: Path, html_path: Path, lang: str, title: str) ->
 if __name__ == "__main__":
     docs = Path(__file__).parent
     convert_md_to_html(docs / "USAGE_GUIDE_EN.md", docs / "USAGE_GUIDE_EN.html", "en", "Context Manager — Usage Guide")
-    convert_md_to_html(docs / "USAGE_GUIDE_UK.md", docs / "USAGE_GUIDE_UK.html", "uk", "Context Manager — Інструкція")
+    convert_md_to_html(docs / "USAGE_GUIDE_UA.md", docs / "USAGE_GUIDE_UA.html", "uk", "Context Manager — Інструкція")

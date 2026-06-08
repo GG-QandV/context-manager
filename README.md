@@ -44,7 +44,7 @@ Runs on **Windows, Linux, and macOS**. No cloud required. No Docker required on 
 
 ### Windows 10/11 (recommended)
 
-> **New to this?** See the [step-by-step usage guide](docs/USAGE_GUIDE_EN.md) ([українською](docs/USAGE_GUIDE_UK.md)) — written for non-technical users with screenshots and plain language.
+> **New to this?** See the [step-by-step usage guide](docs/USAGE_GUIDE_EN.md) ([українською](docs/USAGE_GUIDE_UA.md)) — written for non-technical users with screenshots and plain language.
 
 **One-click install** — open **PowerShell as Administrator** and run:
 
