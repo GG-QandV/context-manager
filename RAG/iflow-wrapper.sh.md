@@ -1,3 +1,10 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> This document describes the original iFlow wrapper design with Weaviate.
+> The project has since been renamed to Context Manager with Qdrant.
+>
+> See `README.md` for current architecture.
+
 Отличная архитектура! Понял проблему — нужна **автоматизация RAG-пайплайна** для контекста между сессиями и подзадачами.
 
 ## Варианты решения:

@@ -1,3 +1,8 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> Paths and architecture described here may be outdated.
+> See `README.md` for current installation and usage.
+
 В новой сессии цель: закрепить обязательный RAG-цикл (извлечение перед работой + сохранение после) и довести интеграцию MCP так, чтобы Antigravity/оркестратор и фронтенд‑субагенты **не могли** работать “в пустоту” между сессиями.[](https://ppl-ai-file-upload.s3.amazonaws.com/web/direct-files/attachments/25482385/190eabb7-334a-4b90-a8fc-9eca8767a335/FRONTEND_AGENT_PROTOCOL_ROADMAP_CHECKLIST.md)
 
 ## Что уже есть (и работает)

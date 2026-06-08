@@ -1,3 +1,12 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> This document describes the original iFlow-based architecture. The project has since been renamed to Context Manager with new paths and stack.
+>
+> **Current paths:** `~/.context-manager/` (all platforms)
+> **Current stack:** PostgreSQL + Qdrant + ONNX (not Weaviate)
+>
+> See `README.md` for current installation and usage.
+
 > **NOTE 2026-06-04:** Все пути `~/.iflow/` в этом документе — устаревшие.
 > Актуальное расположение конфигов:
 > - **Linux:** `~/.config/iflow/`

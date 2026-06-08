@@ -1,3 +1,10 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> This document describes an early Python/Flask + Weaviate design.
+> The project now uses Node.js/Fastify + Qdrant.
+>
+> See `README.md` for current architecture.
+
 Ниже схема того, как можно “привязать” запись/чтение контекста к каждому шагу агента iFlow-CLI и автоматизировать это через Postgres + Weaviate. Вариант выглядит как обёртка над вашим текущим запуском iFlow:
 
 1. Общее решение  

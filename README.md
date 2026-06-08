@@ -76,9 +76,29 @@ Then point Claude Desktop or Antigravity to the generated `mcp.json`.
 
 ### Linux (Docker)
 
+**Prerequisites:** PostgreSQL and Qdrant running on the host (or in separate containers).
+
 ```bash
+# Start Context Manager + TEI embeddings + MCP adapter
 docker compose up -d
+
+# Verify
+curl http://localhost:3847/health
 ```
+
+**Services started:**
+| Service | Port | Purpose |
+|---------|------|---------|
+| `context-manager` | 3847 | Main API |
+| `tei-embeddings` | 8080 | ONNX embeddings (multilingual-e5-small) |
+| `cm-mcp-adapter` | 8770 | MCP HTTP adapter |
+
+**Connect your agent:**
+```bash
+node scripts/init-mcp-config.mjs
+```
+
+Then point Claude Desktop or Antigravity to the generated `mcp.json`.
 
 ### macOS (native)
 

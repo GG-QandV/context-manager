@@ -1,3 +1,8 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> Paths and architecture described here may be outdated.
+> See `README.md` for current installation and usage.
+
 # 
 
 кроме того в пространство загруженны 2 файла для выполнения задания которое содержится в контексте, это Tree_of_project_25-01-2026.txt и FRONTEND_BACKEND_BINDING.md

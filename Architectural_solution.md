@@ -1,3 +1,8 @@
+> ⚠️ **HISTORICAL DOCUMENT — for reference only**
+>
+> Paths and architecture described here may be outdated.
+> See `README.md` for current installation and usage.
+
 > **NOTE 2026-06-04:** Пути `~/.iflow/`, упоминаемые в этом документе, — устаревшие.
 > Актуальное расположение конфигов определяется функцией `getConfigDir()`:
 > - **Linux:** `~/.config/iflow/`
