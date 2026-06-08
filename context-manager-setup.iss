@@ -135,6 +135,9 @@ Source: ".env.windows"; DestDir: "{commonappdata}\{#AppName}\app"; \
 ; Password change script
 Source: "scripts\change-pg-password.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 
+; MCP config generator for Claude Desktop setup
+Source: "scripts\init-mcp-config.mjs"; DestDir: "{app}\scripts"; Flags: ignoreversion
+
 [Icons]
 ; Uninstaller in Programs menu -------------------------------------------
 Name: "{group}\Uninstall {#AppName}"; Filename: "{uninstallexe}"

@@ -116,8 +116,15 @@ If you see an error or the page doesn't load:
 
 ### Step 2: Run the config generator
 
-Type this command and press Enter:
+Type the appropriate command and press Enter:
 
+**If you used the .exe installer (recommended):**
+```powershell
+cd "C:\Program Files\Context Manager"
+.\bin\node.exe scripts\init-mcp-config.mjs
+```
+
+**If you used the PowerShell script (`install-native.ps1`):**
 ```powershell
 cd C:\context-manager
 node scripts/init-mcp-config.mjs
@@ -144,7 +151,9 @@ Claude should be able to see Context Manager and show you statistics about store
 ### Step 1: Open the MCP config
 
 1. Open File Explorer
-2. Navigate to `C:\context-manager`
+2. Navigate to the install folder:
+   - **.exe installer:** `C:\Program Files\Context Manager\app\`
+   - **PowerShell script:** `C:\context-manager\`
 3. Open the file `mcp.json` with Notepad
 
 ### Step 2: Copy the contents
@@ -187,7 +196,7 @@ If you want to check what's stored:
 
 ### Things you might want to know
 
-- **Where is my data stored?** In PostgreSQL database at `C:\context-manager\data\`
+- **Where is my data stored?** In PostgreSQL database (data is in `C:\ProgramData\Context Manager\` for .exe installer, or `C:\context-manager\data\` for PowerShell script install)
 - **Can I backup my data?** Yes, you can export context via the API
 - **How much space does it use?** Usually a few megabytes per conversation
 - **Does it slow down my computer?** No, it uses very little memory when idle
@@ -206,12 +215,22 @@ Context Manager adds a status indicator to your system tray (bottom-right corner
 
 If the tray icon does not appear automatically, you can start it manually:
 
-```bash
+**If you used the .exe installer (recommended):**
+```powershell
+# Windows (PowerShell as Admin)
+cd "C:\Program Files\Context Manager\embed\.venv\Scripts"
+.\pythonw.exe -m cm_integration.tray_pyqt
+```
+
+**If you used the PowerShell script (`install-native.ps1`):**
+```powershell
 # Windows (PowerShell as Admin)
 cd C:\context-manager
 python -m cm_integration.tray_pyqt
+```
 
-# Linux / macOS
+**Linux / macOS:**
+```bash
 python -m cm_integration.tray_pyqt
 ```
 
@@ -225,7 +244,7 @@ The tray icon uses five colors to reflect the current health of the system:
 | 🟢 **Green** | Active | AI model is processing (activity in last 5 seconds) | Let it finish — normal operation |
 | 🩵 **Teal** | Connected | Recent API activity (5–30 seconds ago) | Normal state after heavy use |
 | 🟡 **Yellow** | Warning | Node.js MCP adapter is offline (Fastify API still up) | Check `http://localhost:8770/health` |
-| 🔴 **Red** | Error | Context Manager API is not responding | Run `C:\context-manager\cm-restart.bat` or check logs |
+| 🔴 **Red** | Error | Context Manager API is not responding | Restart services (see [Stopping and starting](#stopping-and-starting-services)) or check logs |
 
 ### How to use the tray icon
 
@@ -308,14 +327,24 @@ python -m cm_integration.tunnel_manager
 
 ### Stop all services
 
+**If you used the PowerShell script (`install-native.ps1`):**
 Double-click the file:
 ```
 C:\context-manager\cm-off.bat
 ```
-
 Or in PowerShell:
 ```powershell
 C:\context-manager\cm-off.bat
+```
+
+**If you used the .exe installer:**
+Open PowerShell as Administrator and run:
+```powershell
+nssm stop cm-watchdog
+nssm stop cm-mcp
+nssm stop cm-api
+nssm stop cm-embed
+nssm stop cm-qdrant
 ```
 
 ### Start all services
@@ -331,10 +360,14 @@ nssm start cm-watchdog
 
 ### Restart all services
 
+**If you used the PowerShell script (`install-native.ps1`):**
 Double-click the file:
 ```
 C:\context-manager\cm-restart.bat
 ```
+
+**If you used the .exe installer:**
+Run the stop commands above, then the start commands.
 
 ### Check if services are running
 
@@ -368,9 +401,8 @@ You should see all services with status "Running".
 ### Config file location
 
 Your configuration is in:
-```
-C:\context-manager\.env
-```
+- **.exe installer:** `C:\ProgramData\Context Manager\app\.env`
+- **PowerShell script:** `C:\context-manager\.env`
 
 You can edit this with Notepad if you need to change settings (like database password).
 
@@ -395,7 +427,7 @@ You can edit this with Notepad if you need to change settings (like database pas
 ### Q: "Claude Desktop doesn't see Context Manager"
 
 **A:**
-1. Make sure you ran `node scripts/init-mcp-config.mjs` from `C:\context-manager`
+1. Make sure you ran the MCP config generator (see [Connecting to Claude Desktop](#connecting-to-claude-desktop))
 2. Completely close Claude Desktop (right-click icon → Quit)
 3. Open Claude Desktop again
 4. Check: `http://localhost:3847/health` should show "healthy"
@@ -411,6 +443,26 @@ You can edit this with Notepad if you need to change settings (like database pas
 ### Q: "How do I uninstall Context Manager?"
 
 **A:**
+
+**If you used the .exe installer:**
+1. Open PowerShell as Administrator and run:
+   ```powershell
+   nssm stop cm-watchdog
+   nssm stop cm-mcp
+   nssm stop cm-api
+   nssm stop cm-embed
+   nssm stop cm-qdrant
+   nssm remove cm-watchdog confirm
+   nssm remove cm-mcp confirm
+   nssm remove cm-api confirm
+   nssm remove cm-embed confirm
+   nssm remove cm-qdrant confirm
+   ```
+2. Delete the folder: `C:\Program Files\Context Manager\`
+3. Delete the data folder: `C:\ProgramData\Context Manager\`
+4. (Optional) Uninstall PostgreSQL and Qdrant via Windows Settings → Apps
+
+**If you used the PowerShell script (`install-native.ps1`):**
 1. Stop all services: double-click `C:\context-manager\cm-off.bat`
 2. Delete these folders: `C:\context-manager\` and `C:\qdrant\`
 3. Open PowerShell as Administrator and run:
@@ -441,19 +493,18 @@ You can edit this with Notepad if you need to change settings (like database pas
 
 ## Summary
 
-| What | Where |
-|------|-------|
-| **Installed files** | `C:\context-manager\` |
-| **Config file** | `C:\context-manager\.env` |
-| **Logs** | `C:\ProgramData\nssm\logs\cm-*.log` |
-| **Health check** | `http://localhost:3847/health` |
-| **Stop services** | `C:\context-manager\cm-off.bat` |
-| **Restart services** | `C:\context-manager\cm-restart.bat` |
-| **Database** | PostgreSQL on port 5432 |
-| **Search engine** | Qdrant on port 6333 |
-| **AI embeddings** | ONNX on port 8080 |
-| **API** | Context Manager on port 3847 |
-| **MCP adapter** | Port 8770 |
+| What | Where (if you used the installer `.exe`) | Where (if you used the PowerShell script) |
+|------|------------------------------------------|-------------------------------------------|
+| **Installed files** | `C:\Program Files\Context Manager\` | `C:\context-manager\` |
+| **Config file** | `C:\ProgramData\Context Manager\app\.env` | `C:\context-manager\.env` |
+| **Logs** | `C:\ProgramData\Context Manager\logs\cm-*.log` | `C:\ProgramData\nssm\logs\cm-*.log` |
+| **Tray executable** | `C:\Program Files\Context Manager\embed\.venv\Scripts\pythonw.exe -m cm_integration.tray_pyqt` | `python -m cm_integration.tray_pyqt` (from `C:\context-manager`) |
+| **Health check** | `http://localhost:3847/health` | `http://localhost:3847/health` |
+| **Database** | PostgreSQL on port 5432 | PostgreSQL on port 5432 |
+| **Search engine** | Qdrant on port 6333 | Qdrant on port 6333 |
+| **AI embeddings** | ONNX on port 8080 | ONNX on port 8080 |
+| **API** | Context Manager on port 3847 | Context Manager on port 3847 |
+| **MCP adapter** | Port 8770 | Port 8770 |
 
 ---
 

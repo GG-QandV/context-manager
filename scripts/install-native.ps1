@@ -190,12 +190,18 @@ if ($DryRun) {
 
 
 # -----------------------------------------------------------------------------
-Write-Step "6. Installing Python dependencies (for ONNX Embedder)"
+Write-Step "6. Installing Python dependencies"
 if ($DryRun) {
     Write-Host "[DryRun] pip install -r embed/requirements.txt"
+    Write-Host "[DryRun] pip install mcp/integration/"
 } else {
     & $pythonPath -m pip install -r embed/requirements.txt
-    if ($LASTEXITCODE -ne 0) { Write-Host "pip install failed." -ForegroundColor Red; exit 1 }
+    if ($LASTEXITCODE -ne 0) { Write-Host "pip install embed/requirements.txt failed." -ForegroundColor Red; exit 1 }
+    
+    # Install cm_integration package (tray + tunnel adapter)
+    Write-Host "Installing cm-integration package (tray + tunnel)..." -ForegroundColor Yellow
+    & $pythonPath -m pip install "$PWD\mcp\integration" --quiet
+    if ($LASTEXITCODE -ne 0) { Write-Host "pip install cm-integration failed." -ForegroundColor Red; exit 1 }
 }
 
 
