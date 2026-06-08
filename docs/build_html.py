@@ -41,11 +41,13 @@ HTML_TEMPLATE = """\
 <body>
 
 <div class="issue-banner">
-  🐛 Знайшли помилку в інструкції? Повідомте на
-  <a href="{issues_url}" target="_blank">GitHub Issues</a>.
+  🐛 Щось не працює? Повідомте на
+  <a href="{issues_url}" target="_blank">GitHub Issues</a>
+  — допоможемо.
   &nbsp;|&nbsp;
-  🐛 Found an error in this guide? Report at
-  <a href="{issues_url}" target="_blank">GitHub Issues</a>.
+  🐛 Something not working? Report at
+  <a href="{issues_url}" target="_blank">GitHub Issues</a>
+  — we'll help.
 </div>
 
 {content}
