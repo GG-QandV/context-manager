@@ -24,4 +24,7 @@ backup/
 # Private/dev docs
 
 models/
+
+# Cleaned docx artifacts
+*_clean.docx
 __pycache__/
