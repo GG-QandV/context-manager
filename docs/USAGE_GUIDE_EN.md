@@ -73,10 +73,7 @@ The installer will guide you through the setup. It will:
 
 When the installer says "Setup Complete", everything is installed and running. You will see a colored circle icon in your system tray (bottom-right corner near the clock).
 
-If you prefer to install via PowerShell, you can use the legacy script:
-```powershell
-irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 | iex
-```
+
 
 ---
 
@@ -471,13 +468,7 @@ You can edit this with Notepad if you need to change settings (like database pas
 
 ### Q: "My antivirus blocks the installer"
 
-**A:** Some antivirus software flags PowerShell scripts. You can:
-1. Temporarily disable your antivirus
-2. Or download the installer script first, then run it locally:
-   ```powershell
-   irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 -OutFile install.ps1
-   .\install.ps1
-   ```
+**A:** The `.exe` installer is signed and should not be flagged by most antivirus software. If your antivirus blocks the download, temporarily disable it, download the installer, then re-enable your antivirus.
 
 ### Q: "I need more help"
 
