@@ -73,8 +73,6 @@ The installer will guide you through the setup. It will:
 
 When the installer says "Setup Complete", everything is installed and running. You will see a colored circle icon in your system tray (bottom-right corner near the clock).
 
-
-
 ---
 
 ## Checking if it worked
@@ -103,7 +101,11 @@ If you see an error or the page doesn't load:
 
 ### Step 1: Open PowerShell as Administrator
 
-(Same as Step 1 in the install section above)
+1. Click the **Start button** (Windows logo in bottom-left corner)
+2. Type `powershell`
+3. Right-click on **Windows PowerShell** in the search results
+4. Click **"Run as administrator"**
+5. Click **Yes** if Windows asks "Do you want to allow this app to make changes?"
 
 ### Step 2: Run the config generator
 
@@ -376,11 +378,23 @@ You should see all services with status "Running".
 ### If something goes wrong
 
 1. **Check the health:** Open browser, go to `http://localhost:3847/health`
-2. **Check the logs:** Open File Explorer, navigate to `C:\ProgramData\nssm\logs\`
+2. **Check the logs:**
+   - **.exe installer:** `C:\ProgramData\Context Manager\logs\`
+   - **PowerShell script:** `C:\ProgramData\nssm\logs\`
 3. **Look for errors:** Open the most recent `.log` file with Notepad
 
 ### Log files location
 
+**If you used the .exe installer:**
+| Service | Log file |
+|---------|----------|
+| Context Manager API | `C:\ProgramData\Context Manager\logs\cm-api.log` |
+| ONNX Embedder | `C:\ProgramData\Context Manager\logs\cm-embed.log` |
+| MCP Adapter | `C:\ProgramData\Context Manager\logs\cm-mcp.log` |
+| Watchdog | `C:\ProgramData\Context Manager\logs\cm-watchdog.log` |
+| Qdrant | `C:\ProgramData\Context Manager\logs\cm-qdrant.log` |
+
+**If you used the PowerShell script (`install-native.ps1`):**
 | Service | Log file |
 |---------|----------|
 | Context Manager API | `C:\ProgramData\nssm\logs\cm-api.log` |
@@ -403,10 +417,10 @@ You can edit this with Notepad if you need to change settings (like database pas
 
 ### Q: "I get an error during installation"
 
-**A:** Most likely cause:
-- **"externally-managed-environment"** — Python 3.12+ issue. Try running the installer again — it should handle this automatically.
-- **"winget not found"** — Windows 10 version too old. You need Windows 10 version 1903 or newer.
-- **"access denied"** — You didn't run PowerShell as Administrator. Close it and reopen as Admin.
+**A:** The installer shows a popup with the specific error. Common causes:
+- **Antivirus blocking the installer** — Temporarily disable your antivirus, then run the installer again.
+- **Insufficient permissions** — Make sure you right-click the installer and select "Run as administrator".
+- **Internet connection** — The installer needs to download PostgreSQL and the ONNX model.
 
 ### Q: "Services don't start after I restart my computer"
 
