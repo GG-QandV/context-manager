@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Context Manager — Usage Guide</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 880px; margin: 0 auto; padding: 20px 24px 60px;
+    line-height: 1.6; color: #222;
+  }
+  h1 { font-size: 1.6em; border-bottom: 2px solid #ddd; padding-bottom: 8px; }
+  h2 { font-size: 1.3em; margin-top: 1.5em; }
+  h3 { font-size: 1.1em; }
+  code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 0.9em; }
+  pre { background: #f4f4f4; padding: 12px; border-radius: 5px; overflow-x: auto; font-size: 0.9em; }
+  pre code { background: none; padding: 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1em 0; font-size: 0.9em; }
+  th, td { border: 1px solid #ccc; padding: 8px 10px; text-align: left; }
+  th { background: #eee; }
+  blockquote { border-left: 4px solid #4a90d9; margin: 1em 0; padding: 8px 16px; background: #f8f9fa; }
+  a { color: #4a90d9; }
+  .issue-banner {
+    background: #fff3cd; border: 1px solid #ffc107; border-radius: 6px;
+    padding: 12px 16px; margin-bottom: 20px; font-size: 0.95em;
+  }
+  .issue-banner a { font-weight: bold; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 2em 0; }
+</style>
+</head>
+<body>
+
+<div class="issue-banner">
+  🐛 Знайшли помилку в інструкції? Повідомте на
+  <a href="https://github.com/GG-QandV/context-manager/issues" target="_blank">GitHub Issues</a>.
+  &nbsp;|&nbsp;
+  🐛 Found an error in this guide? Report at
+  <a href="https://github.com/GG-QandV/context-manager/issues" target="_blank">GitHub Issues</a>.
+</div>
+
+<h1>Context Manager — Usage Guide for Beginners</h1>
+<p><strong>Last updated:</strong> June 2026 | <strong>Version:</strong> 2.2.1</p>
+<blockquote>
+<p>This guide is written for people who are <strong>not programmers</strong>. If you can use email and browse the web, you can follow this guide. No coding knowledge required.</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#what-is-context-manager">What is Context Manager?</a></li>
+<li><a href="#what-you-need-before-installing">What you need before installing</a></li>
+<li><a href="#installing-on-windows-1011">Installing on Windows 10/11</a></li>
+<li><a href="#checking-if-it-worked">Checking if it worked</a></li>
+<li><a href="#connecting-to-claude-desktop">Connecting to Claude Desktop</a></li>
+<li><a href="#connecting-to-cursor--vs-code">Connecting to Cursor / VS Code</a></li>
+<li><a href="#using-context-manager-daily">Using Context Manager daily</a></li>
+<li><a href="#system-tray-icon">System tray icon</a></li>
+<li><a href="#tunnel-management">Tunnel management</a></li>
+<li><a href="#connecting-external-ai-services-through-the-tunnel">Connecting external AI services</a></li>
+<li><a href="#stopping-and-starting-services">Stopping and starting services</a></li>
+<li><a href="#finding-help-and-logs">Finding help and logs</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+<hr />
+<h2>What is Context Manager?</h2>
+<p>Context Manager is a <strong>memory bank for AI assistants</strong> like Claude, ChatGPT, and others.</p>
+<p><strong>The problem it solves:</strong> When you talk to Claude today, it remembers this conversation. But tomorrow, it starts fresh — it forgets everything you discussed yesterday.</p>
+<p><strong>What Context Manager does:</strong> It saves your conversations, decisions, and important information. When you start a new chat, your AI assistant can look up what you discussed before.</p>
+<p><strong>Think of it like this:</strong> Context Manager is like a notebook that your AI assistant can read. You write in it (automatically), and your assistant reads it when you start a new conversation.</p>
+<hr />
+<h2>What you need before installing</h2>
+<p>Before you install Context Manager, make sure you have:</p>
+<ol>
+<li><strong>Windows 10 or Windows 11</strong> (the installer won't work on older versions)</li>
+<li><strong>An internet connection</strong> (to download the installer)</li>
+<li><strong>About 5 minutes</strong> of your time</li>
+<li><strong>Administrator access</strong> on your computer (you'll need to click "Yes" when Windows asks for permission)</li>
+</ol>
+<p>That's it! You don't need to install anything else first.</p>
+<hr />
+<h2>Installing on Windows 10/11</h2>
+<h3>Step 1: Download the installer</h3>
+<ol>
+<li>Open your web browser and go to:
+   <a href="https://github.com/GG-QandV/context-manager/releases">github.com/GG-QandV/context-manager/releases</a></li>
+<li>Download the latest <code>context-manager-setup.exe</code></li>
+<li>Double-click the downloaded file</li>
+<li>Click <strong>Yes</strong> if Windows asks "Do you want to allow this app to make changes?"</li>
+</ol>
+<h3>Step 2: Follow the setup wizard</h3>
+<p>The installer will guide you through the setup. It will:
+- Install PostgreSQL (database) — takes about 1 minute
+- Install Qdrant (search engine) — takes about 30 seconds
+- Install Context Manager services — takes about 2 minutes
+- Download the AI model (multilingual-e5-small) — takes about 1 minute
+- Start all services and show the tray icon — takes about 30 seconds</p>
+<p><strong>Total time:</strong> 5-10 minutes depending on your internet speed.</p>
+<h3>Step 3: Finish</h3>
+<p>When the installer says "Setup Complete", everything is installed and running. You will see a colored circle icon in your system tray (bottom-right corner near the clock).</p>
+<hr />
+<h2>Checking if it worked</h2>
+<p>To check if Context Manager is running properly:</p>
+<ol>
+<li>Open <strong>any web browser</strong> (Chrome, Firefox, Edge, etc.)</li>
+<li>Type this in the address bar and press Enter:
+   <code>http://localhost:3847/health</code></li>
+<li>You should see something like this:
+   <code>json
+   {"status":"healthy","postgresql":"connected","qdrant":"connected"}</code></li>
+</ol>
+<p>If you see <code>"status":"healthy"</code> — everything is working!</p>
+<p>If you see an error or the page doesn't load:
+- Wait 1 minute and try again (services may still be starting)
+- See the <a href="#faq">Troubleshooting section</a> below</p>
+<hr />
+<h2>Connecting to Claude Desktop</h2>
+<h3>Step 1: Open PowerShell as Administrator</h3>
+<ol>
+<li>Click the <strong>Start button</strong> (Windows logo in bottom-left corner)</li>
+<li>Type <code>powershell</code></li>
+<li>Right-click on <strong>Windows PowerShell</strong> in the search results</li>
+<li>Click <strong>"Run as administrator"</strong></li>
+<li>Click <strong>Yes</strong> if Windows asks "Do you want to allow this app to make changes?"</li>
+</ol>
+<h3>Step 2: Run the config generator</h3>
+<p>Type the appropriate command and press Enter:</p>
+<p><strong>If you used the .exe installer (recommended):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd </span><span class="s2">&quot;C:\Program Files\Context Manager&quot;</span>
+<span class="p">.\</span><span class="n">bin</span><span class="p">\</span><span class="n">node</span><span class="p">.</span><span class="n">exe</span> <span class="n">scripts</span><span class="p">\</span><span class="n">init-mcp-config</span><span class="p">.</span><span class="n">mjs</span>
+</code></pre></div>
+
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">context-manager</span>
+<span class="n">node</span> <span class="n">scripts</span><span class="p">/</span><span class="n">init-mcp-config</span><span class="p">.</span><span class="n">mjs</span>
+</code></pre></div>
+
+<p>You should see: "MCP config written to..." — this means it worked.</p>
+<h3>Step 3: Restart Claude Desktop</h3>
+<ol>
+<li>Close Claude Desktop completely (right-click the icon in system tray → Quit)</li>
+<li>Open Claude Desktop again</li>
+</ol>
+<h3>Step 4: Test it</h3>
+<p>Start a new conversation in Claude and ask:</p>
+<blockquote>
+<p>"Can you check your memory using cm_stats?"</p>
+</blockquote>
+<p>Claude should be able to see Context Manager and show you statistics about stored context.</p>
+<hr />
+<h2>Connecting to Cursor / VS Code</h2>
+<h3>Step 1: Open the MCP config</h3>
+<ol>
+<li>Open File Explorer</li>
+<li>Navigate to the install folder:</li>
+<li><strong>.exe installer:</strong> <code>C:\Program Files\Context Manager\app\</code></li>
+<li><strong>PowerShell script:</strong> <code>C:\context-manager\</code></li>
+<li>Open the file <code>mcp.json</code> with Notepad</li>
+</ol>
+<h3>Step 2: Copy the contents</h3>
+<p>Select all text (Ctrl+A) and copy it (Ctrl+C).</p>
+<h3>Step 3: Add to your IDE</h3>
+<p><strong>For Cursor:</strong>
+1. Open Cursor
+2. Press Ctrl+Shift+P
+3. Type "MCP" and select "MCP: Open Configuration"
+4. Paste the copied content and save</p>
+<p><strong>For VS Code with Continue:</strong>
+1. Open VS Code
+2. Press Ctrl+Shift+P
+3. Type "Continue" and select "Continue: Open config.json"
+4. Add the MCP server configuration from the copied content</p>
+<hr />
+<h2>Using Context Manager daily</h2>
+<p>Once installed, you don't need to do anything special. Context Manager works in the background.</p>
+<h3>What happens automatically</h3>
+<ul>
+<li>When you talk to Claude (or other AI tools), important information is saved</li>
+<li>When you start a new conversation, your AI can look up what you discussed before</li>
+<li>Everything is stored locally on your computer — nothing goes to the cloud</li>
+</ul>
+<h3>What you can do manually</h3>
+<p>If you want to check what's stored:</p>
+<ol>
+<li>Open a browser</li>
+<li>Go to <code>http://localhost:3847/health</code> — see if everything is running</li>
+<li>Go to <code>http://localhost:3847/api/context/stats</code> — see how much context is stored</li>
+</ol>
+<h3>Things you might want to know</h3>
+<ul>
+<li><strong>Where is my data stored?</strong> In PostgreSQL database (data is in <code>C:\ProgramData\Context Manager\</code> for .exe installer, or <code>C:\context-manager\data\</code> for PowerShell script install)</li>
+<li><strong>Can I backup my data?</strong> Yes, you can export context via the API</li>
+<li><strong>How much space does it use?</strong> Usually a few megabytes per conversation</li>
+<li><strong>Does it slow down my computer?</strong> No, it uses very little memory when idle</li>
+</ul>
+<hr />
+<h2>System tray icon</h2>
+<p>Context Manager adds a status indicator to your system tray (bottom-right corner of your screen near the clock). The indicator is a colored circle that shows the health of Context Manager at a glance.</p>
+<h3>How the tray icon gets installed</h3>
+<ul>
+<li><strong>On Windows:</strong> The installer registers the tray icon as a service. It starts automatically when you log in.</li>
+<li><strong>On Linux:</strong> The tray icon is launched when the Context Manager API starts. It appears as an AppIndicator in your desktop environment.</li>
+<li><strong>On macOS:</strong> The tray icon uses the platform's native menu bar icon (requires PyQt6).</li>
+</ul>
+<p>If the tray icon does not appear automatically, you can start it manually:</p>
+<p><strong>If you used the .exe installer (recommended):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c"># Windows (PowerShell as Admin)</span>
+<span class="nb">cd </span><span class="s2">&quot;C:\Program Files\Context Manager\embed\.venv\Scripts&quot;</span>
+<span class="p">.\</span><span class="n">pythonw</span><span class="p">.</span><span class="n">exe</span> <span class="n">-m</span> <span class="n">cm_integration</span><span class="p">.</span><span class="n">tray_pyqt</span>
+</code></pre></div>
+
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c"># Windows (PowerShell as Admin)</span>
+<span class="nb">cd </span><span class="n">C</span><span class="p">:\</span><span class="n">context-manager</span>
+<span class="n">python</span> <span class="n">-m</span> <span class="n">cm_integration</span><span class="p">.</span><span class="n">tray_pyqt</span>
+</code></pre></div>
+
+<p><strong>Linux / macOS:</strong></p>
+<div class="codehilite"><pre><span></span><code>python<span class="w"> </span>-m<span class="w"> </span>cm_integration.tray_pyqt
+</code></pre></div>
+
+<h3>What the colors mean</h3>
+<p>The tray icon uses five colors to reflect the current health of the system:</p>
+<table>
+<thead>
+<tr>
+<th>Color</th>
+<th>State</th>
+<th>Meaning</th>
+<th>What to do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔵 <strong>Blue</strong></td>
+<td>Idle</td>
+<td>All services healthy, no recent activity</td>
+<td>Nothing — everything is fine</td>
+</tr>
+<tr>
+<td>🟢 <strong>Green</strong></td>
+<td>Active</td>
+<td>AI model is processing (activity in last 5 seconds)</td>
+<td>Let it finish — normal operation</td>
+</tr>
+<tr>
+<td>🩵 <strong>Teal</strong></td>
+<td>Connected</td>
+<td>Recent API activity (5–30 seconds ago)</td>
+<td>Normal state after heavy use</td>
+</tr>
+<tr>
+<td>🟡 <strong>Yellow</strong></td>
+<td>Warning</td>
+<td>Node.js MCP adapter is offline (Fastify API still up)</td>
+<td>Check <code>http://localhost:8770/health</code></td>
+</tr>
+<tr>
+<td>🔴 <strong>Red</strong></td>
+<td>Error</td>
+<td>Context Manager API is not responding</td>
+<td>Restart services (see <a href="#stopping-and-starting-services">Stopping and starting</a>) or check logs</td>
+</tr>
+</tbody>
+</table>
+<h3>How to use the tray icon</h3>
+<ol>
+<li><strong>Right-click</strong> the colored circle in your system tray</li>
+<li>A menu appears with the following options:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Menu item</th>
+<th>Icon</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Status</strong></td>
+<td>ℹ️ <code>info-thin.svg</code></td>
+<td>Shows a popup with current system status</td>
+</tr>
+<tr>
+<td><strong>Tunnel</strong></td>
+<td>🌐 <code>globe-simple-thin.svg</code></td>
+<td>Opens tunnel management submenu (see below)</td>
+</tr>
+<tr>
+<td><strong>Quit</strong></td>
+<td>⏻ <code>power-thin.svg</code></td>
+<td>Closes the tray icon (services keep running)</td>
+</tr>
+</tbody>
+</table>
+<h3>Tunnel management</h3>
+<p>The tunnel allows external AI tools (Claude, Perplexity, ChatGPT, Grok) to securely connect to your Context Manager over the internet. It uses SSH tunneling (Serveo) to create a public URL that points to your local Context Manager.</p>
+<h4>Tunnel installation</h4>
+<p>The tunnel is built into Context Manager — no separate installation needed. However, the OAuth adapter (which manages authentication for external connections) runs as a separate background process. To install or verify the tunnel components:</p>
+<p><strong>Windows (installed automatically):</strong>
+- <code>python -m cm_integration.tunnel_manager</code> is registered as a background process
+- The tray icon starts and stops it through its menu</p>
+<p><strong>Linux / macOS (first-time setup):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ensure SSH is available (required for Serveo tunnel)</span>
+which<span class="w"> </span>ssh<span class="w"> </span><span class="o">||</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>openssh-client
+
+<span class="c1"># Start the tunnel adapter manually</span>
+python<span class="w"> </span>-m<span class="w"> </span>cm_integration.tunnel_manager
+</code></pre></div>
+
+<h4>Using the tunnel from the tray icon</h4>
+<p><strong>Step 1 — Start the tunnel:</strong>
+1. Right-click the tray icon → <strong>Tunnel</strong> → ▶️ <strong>Start Tunnel</strong> (with <code>play-thin.svg</code> icon)
+2. Wait a few seconds — the tray will show a notification "🌐 Tunnel Ready" with the tunnel URL
+3. The tunnel status changes to <strong>ACTIVE</strong> with the URL shown in the tooltip</p>
+<p><strong>Step 2 — Copy connection details for your AI tools:</strong>
+1. Right-click the tray icon → <strong>Tunnel</strong>
+2. You will see a list of configured services (Perplexity, Claude, Grok, etc.), each with its own icon
+3. Hover over a service → click <strong>📋 Copy URL</strong> (<code>copy-thin.svg</code>) — the full tunnel URL for that service is copied to your clipboard
+4. If the service requires authentication, also click <strong>🔑 Copy Token</strong> (<code>key-thin.svg</code>) — the auth token is copied
+5. Paste these into your AI tool's MCP configuration file</p>
+<p><strong>Step 3 — Stop the tunnel:</strong>
+- Right-click the tray icon → <strong>Tunnel</strong> → ⏹️ <strong>Stop Tunnel</strong> (<code>stop-thin.svg</code>)</p>
+<p><strong>Step 4 — Restart the tunnel (if something isn't working):</strong>
+- Right-click the tray icon → <strong>Tunnel</strong> → 🔄 <strong>Restart Tunnel</strong> (<code>arrows-clockwise-thin.svg</code>)</p>
+<p><strong>Emergency kill (if the tunnel gets stuck):</strong>
+- Right-click the tray icon → <strong>Tunnel</strong> → 🗑️ <strong>Force Kill Tunnel</strong> (<code>trash-thin.svg</code>)</p>
+<blockquote>
+<p><strong>Tip:</strong> The tunnel stays running even after you close the tray icon. You can always check its status by reopening the tray and hovering over the Tunnel menu.</p>
+</blockquote>
+<h4>Tunnel status indicators</h4>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ACTIVE</strong></td>
+<td>Tunnel is running, external connections allowed</td>
+</tr>
+<tr>
+<td><strong>Starting…</strong></td>
+<td>Tunnel is initializing (wait a few seconds)</td>
+</tr>
+<tr>
+<td><strong>Off</strong></td>
+<td>Tunnel is not running</td>
+</tr>
+</tbody>
+</table>
+<h4>Troubleshooting the tunnel</h4>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tunnel won't start</strong></td>
+<td>Check that SSH is installed. On Windows, ensure OpenSSH Client is enabled (Settings → Apps → Optional Features).</td>
+</tr>
+<tr>
+<td><strong>"OAuth adapter did not respond"</strong></td>
+<td>Port 8769 may be in use. The Force Kill option clears all processes using this port.</td>
+</tr>
+<tr>
+<td><strong>Tunnel starts but AI tools can't connect</strong></td>
+<td>Try <strong>Restart Tunnel</strong> — this kills and re-creates the SSH tunnel with a fresh connection.</td>
+</tr>
+<tr>
+<td><strong>"Address already in use"</strong></td>
+<td>Use <strong>Force Kill Tunnel</strong> to clear orphaned processes, then try Start again.</td>
+</tr>
+<tr>
+<td><strong>Connection drops after some time</strong></td>
+<td>Serveo free tunnels may time out after 30 minutes of inactivity. Simply <strong>Restart Tunnel</strong> to reconnect.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Connecting external AI services through the tunnel</h2>
+<p>When the tunnel is active, you can connect various AI services to Context Manager over the internet. Each service has its own URL and authorization method.</p>
+<p><strong>How to get the URL and token:</strong>
+1. Right-click the tray icon → <strong>Tunnel</strong>
+2. Hover over the service → <strong>📋 Copy URL</strong> — the URL is copied to clipboard
+3. If the service requires a token, also click <strong>🔑 Copy Token</strong></p>
+<h3>Perplexity</h3>
+<div class="codehilite"><pre><span></span><code>URL:  https://&lt;your-tunnel&gt;/mcp
+Type: Streamable HTTP
+Token: not required
+</code></pre></div>
+
+<p><strong>Setup:</strong>
+1. Open Perplexity → <strong>Settings</strong> → <strong>AI Plugins</strong> → <strong>MCP URL</strong>
+2. Paste the copied URL (path <code>/mcp</code>)
+3. Connection type: <strong>Streamable HTTP</strong>
+4. Save</p>
+<h3>Claude.ai (web version)</h3>
+<div class="codehilite"><pre><span></span><code>URL:  https://&lt;your-tunnel&gt;/sse
+Auth: Bearer Token (or OAuth)
+</code></pre></div>
+
+<p><strong>Setup:</strong>
+1. Open <a href="https://claude.ai">claude.ai</a> → <strong>Settings</strong> → <strong>Integrations</strong> → <strong>Add Custom Connector</strong>
+2. Paste the copied URL (path <code>/sse</code>)
+3. If prompted for a token — click <strong>🔑 Copy Token</strong> in the tray and paste it
+4. Save</p>
+<h3>ChatGPT</h3>
+<div class="codehilite"><pre><span></span><code>URL:  https://&lt;your-tunnel&gt;/mcp/chatgpt
+Auth: OAuth (automatic)
+</code></pre></div>
+
+<p><strong>Setup:</strong>
+1. Open ChatGPT → <strong>Settings</strong> → <strong>Connectors</strong> → <strong>Add</strong>
+2. Paste the copied URL (path <code>/mcp/chatgpt</code>)
+3. ChatGPT will automatically perform OAuth — follow the browser prompts
+4. Save</p>
+<h3>Grok (xAI)</h3>
+<div class="codehilite"><pre><span></span><code>URL:  https://&lt;your-tunnel&gt;/mcp/grok
+Type: HTTP / MCP
+Auth: Bearer Token
+</code></pre></div>
+
+<p><strong>Setup:</strong>
+1. Open Grok → <strong>Settings</strong> → <strong>Connected Services</strong> → <strong>Add MCP Server</strong>
+2. Paste the copied URL (path <code>/mcp/grok</code>)
+3. Click <strong>🔑 Copy Token</strong> in the tray and paste it
+4. Save</p>
+<p><strong>Tip:</strong> The tunnel URL changes each time you restart the tunnel. Update the URL in your service settings after restarting.</p>
+<hr />
+<h2>Stopping and starting services</h2>
+<h3>Stop all services</h3>
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong>
+Double-click the file:</p>
+<div class="codehilite"><pre><span></span><code>C:\context-manager\cm-off.bat
+</code></pre></div>
+
+<p>Or in PowerShell:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">C</span><span class="p">:\</span><span class="n">context-manager</span><span class="p">\</span><span class="n">cm-off</span><span class="p">.</span><span class="n">bat</span>
+</code></pre></div>
+
+<p><strong>If you used the .exe installer:</strong>
+Open PowerShell as Administrator and run:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">nssm</span> <span class="n">stop</span> <span class="n">cm-watchdog</span>
+<span class="n">nssm</span> <span class="n">stop</span> <span class="n">cm-mcp</span>
+<span class="n">nssm</span> <span class="n">stop</span> <span class="n">cm-api</span>
+<span class="n">nssm</span> <span class="n">stop</span> <span class="n">cm-embed</span>
+<span class="n">nssm</span> <span class="n">stop</span> <span class="n">cm-qdrant</span>
+</code></pre></div>
+
+<h3>Start all services</h3>
+<p>Open PowerShell as Administrator and run:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">nssm</span> <span class="nb">start </span><span class="n">cm-qdrant</span>
+<span class="n">nssm</span> <span class="nb">start </span><span class="n">cm-embed</span>
+<span class="n">nssm</span> <span class="nb">start </span><span class="n">cm-api</span>
+<span class="n">nssm</span> <span class="nb">start </span><span class="n">cm-mcp</span>
+<span class="n">nssm</span> <span class="nb">start </span><span class="n">cm-watchdog</span>
+</code></pre></div>
+
+<h3>Restart all services</h3>
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong>
+Double-click the file:</p>
+<div class="codehilite"><pre><span></span><code>C:\context-manager\cm-restart.bat
+</code></pre></div>
+
+<p><strong>If you used the .exe installer:</strong>
+Run the stop commands above, then the start commands.</p>
+<h3>Check if services are running</h3>
+<p>In PowerShell:</p>
+<div class="codehilite"><pre><span></span><code><span class="nb">Get-Service</span> <span class="n">cm</span><span class="p">-*,</span> <span class="n">cm-qdrant</span><span class="p">,</span> <span class="n">cm-embed</span>
+</code></pre></div>
+
+<p>You should see all services with status "Running".</p>
+<hr />
+<h2>Finding help and logs</h2>
+<h3>If something goes wrong</h3>
+<ol>
+<li><strong>Check the health:</strong> Open browser, go to <code>http://localhost:3847/health</code></li>
+<li><strong>Check the logs:</strong></li>
+<li><strong>.exe installer:</strong> <code>C:\ProgramData\Context Manager\logs\</code></li>
+<li><strong>PowerShell script:</strong> <code>C:\ProgramData\nssm\logs\</code></li>
+<li><strong>Look for errors:</strong> Open the most recent <code>.log</code> file with Notepad</li>
+</ol>
+<h3>Log files location</h3>
+<p><strong>If you used the .exe installer:</strong>
+| Service | Log file |
+|---------|----------|
+| Context Manager API | <code>C:\ProgramData\Context Manager\logs\cm-api.log</code> |
+| ONNX Embedder | <code>C:\ProgramData\Context Manager\logs\cm-embed.log</code> |
+| MCP Adapter | <code>C:\ProgramData\Context Manager\logs\cm-mcp.log</code> |
+| Watchdog | <code>C:\ProgramData\Context Manager\logs\cm-watchdog.log</code> |
+| Qdrant | <code>C:\ProgramData\Context Manager\logs\cm-qdrant.log</code> |</p>
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong>
+| Service | Log file |
+|---------|----------|
+| Context Manager API | <code>C:\ProgramData\nssm\logs\cm-api.log</code> |
+| ONNX Embedder | <code>C:\ProgramData\nssm\logs\cm-embed.log</code> |
+| MCP Adapter | <code>C:\ProgramData\nssm\logs\cm-mcp.log</code> |
+| Watchdog | <code>C:\ProgramData\nssm\logs\cm-watchdog.log</code> |
+| Qdrant | <code>C:\ProgramData\nssm\logs\cm-qdrant.log</code> |</p>
+<h3>Config file location</h3>
+<p>Your configuration is in:
+- <strong>.exe installer:</strong> <code>C:\ProgramData\Context Manager\app\.env</code>
+- <strong>PowerShell script:</strong> <code>C:\context-manager\.env</code></p>
+<p>You can edit this with Notepad if you need to change settings (like database password).</p>
+<hr />
+<h2>FAQ</h2>
+<h3>Q: "I get an error during installation"</h3>
+<p><strong>A:</strong> The installer shows a popup with the specific error. Common causes:
+- <strong>Antivirus blocking the installer</strong> — Temporarily disable your antivirus, then run the installer again.
+- <strong>Insufficient permissions</strong> — Make sure you right-click the installer and select "Run as administrator".
+- <strong>Internet connection</strong> — The installer needs to download PostgreSQL and the ONNX model.</p>
+<h3>Q: "Services don't start after I restart my computer"</h3>
+<p><strong>A:</strong> Wait 30-60 seconds after boot. Services start automatically but ONNX model takes time to load. If they still don't start:
+1. Open PowerShell as Administrator
+2. Run: <code>Get-Service cm-*</code>
+3. If any show "Stopped", start them manually: <code>nssm start cm-api</code></p>
+<h3>Q: "Claude Desktop doesn't see Context Manager"</h3>
+<p><strong>A:</strong>
+1. Make sure you ran the MCP config generator (see <a href="#connecting-to-claude-desktop">Connecting to Claude Desktop</a>)
+2. Completely close Claude Desktop (right-click icon → Quit)
+3. Open Claude Desktop again
+4. Check: <code>http://localhost:3847/health</code> should show "healthy"</p>
+<h3>Q: "Can I use Context Manager with multiple AI tools?"</h3>
+<p><strong>A:</strong> Yes! You can connect Claude Desktop, Cursor, and other MCP-compatible tools at the same time. They all share the same context.</p>
+<h3>Q: "Is my data sent to the cloud?"</h3>
+<p><strong>A:</strong> No. Everything stays on your computer. Context Manager is 100% local.</p>
+<h3>Q: "How do I uninstall Context Manager?"</h3>
+<p><strong>A:</strong></p>
+<p><strong>If you used the .exe installer:</strong>
+1. Open PowerShell as Administrator and run:
+   <code>powershell
+   nssm stop cm-watchdog
+   nssm stop cm-mcp
+   nssm stop cm-api
+   nssm stop cm-embed
+   nssm stop cm-qdrant
+   nssm remove cm-watchdog confirm
+   nssm remove cm-mcp confirm
+   nssm remove cm-api confirm
+   nssm remove cm-embed confirm
+   nssm remove cm-qdrant confirm</code>
+2. Delete the folder: <code>C:\Program Files\Context Manager\</code>
+3. Delete the data folder: <code>C:\ProgramData\Context Manager\</code>
+4. (Optional) Uninstall PostgreSQL and Qdrant via Windows Settings → Apps</p>
+<p><strong>If you used the PowerShell script (<code>install-native.ps1</code>):</strong>
+1. Stop all services: double-click <code>C:\context-manager\cm-off.bat</code>
+2. Delete these folders: <code>C:\context-manager\</code> and <code>C:\qdrant\</code>
+3. Open PowerShell as Administrator and run:
+   <code>powershell
+   nssm remove cm-api confirm
+   nssm remove cm-embed confirm
+   nssm remove cm-mcp confirm
+   nssm remove cm-qdrant confirm
+   nssm remove cm-watchdog confirm</code>
+4. (Optional) Uninstall PostgreSQL and Qdrant via Windows Settings → Apps</p>
+<h3>Q: "My antivirus blocks the installer"</h3>
+<p><strong>A:</strong> The <code>.exe</code> installer is signed and should not be flagged by most antivirus software. If your antivirus blocks the download, temporarily disable it, download the installer, then re-enable your antivirus.</p>
+<h3>Q: "I need more help"</h3>
+<p><strong>A:</strong> Open an issue on GitHub: <a href="https://github.com/GG-QandV/context-manager/issues">github.com/GG-QandV/context-manager/issues</a></p>
+<hr />
+<h2>Summary</h2>
+<table>
+<thead>
+<tr>
+<th>What</th>
+<th>Where (if you used the installer <code>.exe</code>)</th>
+<th>Where (if you used the PowerShell script)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Installed files</strong></td>
+<td><code>C:\Program Files\Context Manager\</code></td>
+<td><code>C:\context-manager\</code></td>
+</tr>
+<tr>
+<td><strong>Config file</strong></td>
+<td><code>C:\ProgramData\Context Manager\app\.env</code></td>
+<td><code>C:\context-manager\.env</code></td>
+</tr>
+<tr>
+<td><strong>Logs</strong></td>
+<td><code>C:\ProgramData\Context Manager\logs\cm-*.log</code></td>
+<td><code>C:\ProgramData\nssm\logs\cm-*.log</code></td>
+</tr>
+<tr>
+<td><strong>Tray executable</strong></td>
+<td><code>C:\Program Files\Context Manager\embed\.venv\Scripts\pythonw.exe -m cm_integration.tray_pyqt</code></td>
+<td><code>python -m cm_integration.tray_pyqt</code> (from <code>C:\context-manager</code>)</td>
+</tr>
+<tr>
+<td><strong>Health check</strong></td>
+<td><code>http://localhost:3847/health</code></td>
+<td><code>http://localhost:3847/health</code></td>
+</tr>
+<tr>
+<td><strong>Database</strong></td>
+<td>PostgreSQL on port 5432</td>
+<td>PostgreSQL on port 5432</td>
+</tr>
+<tr>
+<td><strong>Search engine</strong></td>
+<td>Qdrant on port 6333</td>
+<td>Qdrant on port 6333</td>
+</tr>
+<tr>
+<td><strong>AI embeddings</strong></td>
+<td>ONNX on port 8080</td>
+<td>ONNX on port 8080</td>
+</tr>
+<tr>
+<td><strong>API</strong></td>
+<td>Context Manager on port 3847</td>
+<td>Context Manager on port 3847</td>
+</tr>
+<tr>
+<td><strong>MCP adapter</strong></td>
+<td>Port 8770</td>
+<td>Port 8770</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>Last updated: June 2026 · Context Manager v2.2.1</em></p>
+
+<hr>
+<p style="text-align:center;color:#888;font-size:0.85em">
+  Context Manager &middot;
+  <a href="https://github.com/GG-QandV/context-manager/issues" target="_blank">Report an issue</a>
+</p>
+</body>
+</html>
