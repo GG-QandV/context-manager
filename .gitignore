@@ -16,6 +16,7 @@ node_modules/
 *.old
 *.ts.[0-9]
 .*.bkp
+backup/
 
 # IDE
 .vscode/
