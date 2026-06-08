@@ -50,39 +50,33 @@ That's it! You don't need to install anything else first.
 
 ## Installing on Windows 10/11
 
-### Step 1: Open PowerShell as Administrator
+### Step 1: Download the installer
 
-1. Click the **Start button** (Windows logo in bottom-left corner)
-2. Type `powershell`
-3. Right-click on **Windows PowerShell** in the search results
-4. Click **"Run as administrator"**
-5. Click **Yes** if Windows asks "Do you want to allow this app to make changes?"
+1. Open your web browser and go to:
+   [github.com/GG-QandV/context-manager/releases](https://github.com/GG-QandV/context-manager/releases)
+2. Download the latest `context-manager-setup.exe`
+3. Double-click the downloaded file
+4. Click **Yes** if Windows asks "Do you want to allow this app to make changes?"
 
-### Step 2: Run the installer
+### Step 2: Follow the setup wizard
 
-Copy and paste this entire line into the PowerShell window, then press Enter:
-
-```powershell
-irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 | iex
-```
-
-### Step 3: Wait for it to finish
-
-The installer will:
-- Download and install PostgreSQL (database) — takes about 1 minute
-- Download and install Qdrant (search engine) — takes about 30 seconds
-- Download and install Node.js (if you don't have it) — takes about 1 minute
-- Download and install Context Manager — takes about 2 minutes
+The installer will guide you through the setup. It will:
+- Install PostgreSQL (database) — takes about 1 minute
+- Install Qdrant (search engine) — takes about 30 seconds
+- Install Context Manager services — takes about 2 minutes
 - Download the AI model (multilingual-e5-small) — takes about 1 minute
-- Start all services — takes about 30 seconds
+- Start all services and show the tray icon — takes about 30 seconds
 
 **Total time:** 5-10 minutes depending on your internet speed.
 
-**What you'll see:** The PowerShell window will show progress messages. When it says "Context Manager installed successfully", you're done!
+### Step 3: Finish
 
-### Step 4: Close PowerShell
+When the installer says "Setup Complete", everything is installed and running. You will see a colored circle icon in your system tray (bottom-right corner near the clock).
 
-You can close the PowerShell window now. Everything is installed and running.
+If you prefer to install via PowerShell, you can use the legacy script:
+```powershell
+irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 | iex
+```
 
 ---
 
