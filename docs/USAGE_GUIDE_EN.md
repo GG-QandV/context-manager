@@ -15,9 +15,11 @@
 5. [Connecting to Claude Desktop](#connecting-to-claude-desktop)
 6. [Connecting to Cursor / VS Code](#connecting-to-cursor--vs-code)
 7. [Using Context Manager daily](#using-context-manager-daily)
-8. [Stopping and starting services](#stopping-and-starting-services)
-9. [Finding help and logs](#finding-help-and-logs)
-10. [FAQ](#faq)
+8. [System tray icon](#system-tray-icon)
+9. [Tunnel management](#tunnel-management)
+10. [Stopping and starting services](#stopping-and-starting-services)
+11. [Finding help and logs](#finding-help-and-logs)
+12. [FAQ](#faq)
 
 ---
 
@@ -194,54 +196,111 @@ If you want to check what's stored:
 
 ## System tray icon
 
-Context Manager adds a colored circle to your system tray (bottom-right corner of your screen near the clock). It shows the health of Context Manager at a glance.
+Context Manager adds a status indicator to your system tray (bottom-right corner of your screen near the clock). The indicator is a colored circle that shows the health of Context Manager at a glance.
+
+### How the tray icon gets installed
+
+- **On Windows:** The installer registers the tray icon as a service. It starts automatically when you log in.
+- **On Linux:** The tray icon is launched when the Context Manager API starts. It appears as an AppIndicator in your desktop environment.
+- **On macOS:** The tray icon uses the platform's native menu bar icon (requires PyQt6).
+
+If the tray icon does not appear automatically, you can start it manually:
+
+```bash
+# Windows (PowerShell as Admin)
+cd C:\context-manager
+python -m cm_integration.tray_pyqt
+
+# Linux / macOS
+python -m cm_integration.tray_pyqt
+```
 
 ### What the colors mean
 
-| Color | Meaning | What to do |
-|-------|---------|------------|
-| 🔵 **Blue** | All services healthy and running | Nothing — everything is fine |
-| 🟡 **Yellow** | One or more components are down | Check health at `http://localhost:3847/health` |
-| 🔴 **Red** | Context Manager is not running | Start services with `C:\context-manager\cm-restart.bat` |
+The tray icon uses five colors to reflect the current health of the system:
+
+| Color | State | Meaning | What to do |
+|-------|-------|---------|------------|
+| 🔵 **Blue** | Idle | All services healthy, no recent activity | Nothing — everything is fine |
+| 🟢 **Green** | Active | AI model is processing (activity in last 5 seconds) | Let it finish — normal operation |
+| 🩵 **Teal** | Connected | Recent API activity (5–30 seconds ago) | Normal state after heavy use |
+| 🟡 **Yellow** | Warning | Node.js MCP adapter is offline (Fastify API still up) | Check `http://localhost:8770/health` |
+| 🔴 **Red** | Error | Context Manager API is not responding | Run `C:\context-manager\cm-restart.bat` or check logs |
 
 ### How to use the tray icon
 
 1. **Right-click** the colored circle in your system tray
-2. A menu appears with options:
+2. A menu appears with the following options:
 
-| Menu item | What it does |
-|-----------|-------------|
-| **Status** | Shows a popup with current system status |
-| **Hard RAM Reset (Emergency)** | Clears all cached memory and restarts from scratch |
-| **🌐 Tunnel** | Manages external access to your Context Manager (see below) |
-| **Quit** | Closes the tray icon (services keep running) |
+| Menu item | Icon | What it does |
+|-----------|------|-------------|
+| **Status** | ℹ️ `info-thin.svg` | Shows a popup with current system status |
+| **Tunnel** | 🌐 `globe-simple-thin.svg` | Opens tunnel management submenu (see below) |
+| **Quit** | ⏻ `power-thin.svg` | Closes the tray icon (services keep running) |
 
-### Using the Tunnel
+### Tunnel management
 
-The tunnel allows external AI tools (Claude, Perplexity, ChatGPT, Grok) to connect to your Context Manager from anywhere.
+The tunnel allows external AI tools (Claude, Perplexity, ChatGPT, Grok) to securely connect to your Context Manager over the internet. It uses SSH tunneling (Serveo) to create a public URL that points to your local Context Manager.
 
-**Start the tunnel:**
-1. Right-click the tray icon → **🌐 Tunnel** → **▶ Start Tunnel**
-2. Wait a few seconds — the icon will show a notification when the tunnel is ready
-3. The tunnel submenu will show Active with the tunnel URL
+#### Tunnel installation
 
-**Copy URLs for your AI tools:**
-1. Right-click the tray icon → **🌐 Tunnel**
-2. You will see a list of configured services (Perplexity, Claude, Grok, etc.)
-3. Click on a service → **📋 Copy URL** — the URL is copied to your clipboard
-4. If needed, also click **📋 Copy Token** — the auth token is copied
-5. Paste these into your AI tool's MCP configuration
+The tunnel is built into Context Manager — no separate installation needed. However, the OAuth adapter (which manages authentication for external connections) runs as a separate background process. To install or verify the tunnel components:
 
-**Stop the tunnel:**
-1. Right-click the tray icon → **🌐 Tunnel** → **■ Stop Tunnel**
+**Windows (installed automatically):**
+- `python -m cm_integration.tunnel_manager` is registered as a background process
+- The tray icon starts and stops it through its menu
 
-**Restart the tunnel (if something isn't working):**
-1. Right-click the tray icon → **🌐 Tunnel** → **↺ Restart Tunnel**
+**Linux / macOS (first-time setup):**
+```bash
+# Ensure SSH is available (required for Serveo tunnel)
+which ssh || sudo apt install openssh-client
 
-**Emergency kill (if tunnel gets stuck):**
-1. Right-click the tray icon → **🌐 Tunnel** → **✕ Force Kill Tunnel**
+# Start the tunnel adapter manually
+python -m cm_integration.tunnel_manager
+```
 
-> **Tip:** After starting the tunnel once, it stays running even if you close the tray icon. You can check tunnel status anytime.
+#### Using the tunnel from the tray icon
+
+**Step 1 — Start the tunnel:**
+1. Right-click the tray icon → **Tunnel** → ▶️ **Start Tunnel** (with `play-thin.svg` icon)
+2. Wait a few seconds — the tray will show a notification "🌐 Tunnel Ready" with the tunnel URL
+3. The tunnel status changes to **ACTIVE** with the URL shown in the tooltip
+
+**Step 2 — Copy connection details for your AI tools:**
+1. Right-click the tray icon → **Tunnel**
+2. You will see a list of configured services (Perplexity, Claude, Grok, etc.), each with its own icon
+3. Hover over a service → click **📋 Copy URL** (`copy-thin.svg`) — the full tunnel URL for that service is copied to your clipboard
+4. If the service requires authentication, also click **🔑 Copy Token** (`key-thin.svg`) — the auth token is copied
+5. Paste these into your AI tool's MCP configuration file
+
+**Step 3 — Stop the tunnel:**
+- Right-click the tray icon → **Tunnel** → ⏹️ **Stop Tunnel** (`stop-thin.svg`)
+
+**Step 4 — Restart the tunnel (if something isn't working):**
+- Right-click the tray icon → **Tunnel** → 🔄 **Restart Tunnel** (`arrows-clockwise-thin.svg`)
+
+**Emergency kill (if the tunnel gets stuck):**
+- Right-click the tray icon → **Tunnel** → 🗑️ **Force Kill Tunnel** (`trash-thin.svg`)
+
+> **Tip:** The tunnel stays running even after you close the tray icon. You can always check its status by reopening the tray and hovering over the Tunnel menu.
+
+#### Tunnel status indicators
+
+| Status | Meaning |
+|--------|---------|
+| **ACTIVE** | Tunnel is running, external connections allowed |
+| **Starting…** | Tunnel is initializing (wait a few seconds) |
+| **Off** | Tunnel is not running |
+
+#### Troubleshooting the tunnel
+
+| Problem | Solution |
+|---------|----------|
+| **Tunnel won't start** | Check that SSH is installed. On Windows, ensure OpenSSH Client is enabled (Settings → Apps → Optional Features). |
+| **"OAuth adapter did not respond"** | Port 8769 may be in use. The Force Kill option clears all processes using this port. |
+| **Tunnel starts but AI tools can't connect** | Try **Restart Tunnel** — this kills and re-creates the SSH tunnel with a fresh connection. |
+| **"Address already in use"** | Use **Force Kill Tunnel** to clear orphaned processes, then try Start again. |
+| **Connection drops after some time** | Serveo free tunnels may time out after 30 minutes of inactivity. Simply **Restart Tunnel** to reconnect. |
 
 ---
 
