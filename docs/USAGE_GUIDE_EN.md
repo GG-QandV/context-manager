@@ -17,9 +17,10 @@
 7. [Using Context Manager daily](#using-context-manager-daily)
 8. [System tray icon](#system-tray-icon)
 9. [Tunnel management](#tunnel-management)
-10. [Stopping and starting services](#stopping-and-starting-services)
-11. [Finding help and logs](#finding-help-and-logs)
-12. [FAQ](#faq)
+10. [Connecting external AI services](#connecting-external-ai-services-through-the-tunnel)
+11. [Stopping and starting services](#stopping-and-starting-services)
+12. [Finding help and logs](#finding-help-and-logs)
+13. [FAQ](#faq)
 
 ---
 
@@ -313,6 +314,73 @@ python -m cm_integration.tunnel_manager
 | **Tunnel starts but AI tools can't connect** | Try **Restart Tunnel** — this kills and re-creates the SSH tunnel with a fresh connection. |
 | **"Address already in use"** | Use **Force Kill Tunnel** to clear orphaned processes, then try Start again. |
 | **Connection drops after some time** | Serveo free tunnels may time out after 30 minutes of inactivity. Simply **Restart Tunnel** to reconnect. |
+
+---
+
+## Connecting external AI services through the tunnel
+
+When the tunnel is active, you can connect various AI services to Context Manager over the internet. Each service has its own URL and authorization method.
+
+**How to get the URL and token:**
+1. Right-click the tray icon → **Tunnel**
+2. Hover over the service → **📋 Copy URL** — the URL is copied to clipboard
+3. If the service requires a token, also click **🔑 Copy Token**
+
+### Perplexity
+
+```
+URL:  https://<your-tunnel>/mcp
+Type: Streamable HTTP
+Token: not required
+```
+
+**Setup:**
+1. Open Perplexity → **Settings** → **AI Plugins** → **MCP URL**
+2. Paste the copied URL (path `/mcp`)
+3. Connection type: **Streamable HTTP**
+4. Save
+
+### Claude.ai (web version)
+
+```
+URL:  https://<your-tunnel>/sse
+Auth: Bearer Token (or OAuth)
+```
+
+**Setup:**
+1. Open [claude.ai](https://claude.ai) → **Settings** → **Integrations** → **Add Custom Connector**
+2. Paste the copied URL (path `/sse`)
+3. If prompted for a token — click **🔑 Copy Token** in the tray and paste it
+4. Save
+
+### ChatGPT
+
+```
+URL:  https://<your-tunnel>/mcp/chatgpt
+Auth: Bearer Token
+```
+
+**Setup:**
+1. Open ChatGPT → **Settings** → **Connectors** → **Add**
+2. Paste the copied URL (path `/mcp/chatgpt`)
+3. Click **🔑 Copy Token** in the tray and paste it in the Token field
+4. Save
+
+### Grok (xAI)
+
+```
+URL:  https://<your-tunnel>/mcp/grok
+Type: HTTP / MCP
+Auth: Bearer Token
+```
+
+**Setup:**
+1. Open Grok → **Settings** → **Connected Services** → **Add MCP Server**
+2. Paste the copied URL (path `/mcp/grok`)
+3. Click **🔑 Copy Token** in the tray and paste it
+4. Save
+
+**Tip:** The tunnel URL changes each time you restart the tunnel. Update the URL in your service settings after restarting.
 
 ---
 
