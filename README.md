@@ -103,6 +103,8 @@ Get-Service cm-*, cm-qdrant, cm-embed
 notepad C:\ProgramData\nssm\logs\cm-api.log
 ```
 
+> **System tray icon:** After install, a colored circle appears in your system tray showing health status. Right-click it to manage services, start the tunnel, or copy URLs. See the [usage guide](docs/USAGE_GUIDE_EN.md#system-tray-icon) for details.
+
 > **Having trouble?** Check the [troubleshooting section](#troubleshooting) below, or see the [full usage guide](docs/USAGE_GUIDE_EN.md).
 
 ### Linux (Docker)

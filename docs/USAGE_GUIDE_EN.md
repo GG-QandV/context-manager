@@ -192,6 +192,59 @@ If you want to check what's stored:
 
 ---
 
+## System tray icon
+
+Context Manager adds a colored circle to your system tray (bottom-right corner of your screen near the clock). It shows the health of Context Manager at a glance.
+
+### What the colors mean
+
+| Color | Meaning | What to do |
+|-------|---------|------------|
+| 🔵 **Blue** | All services healthy and running | Nothing — everything is fine |
+| 🟡 **Yellow** | One or more components are down | Check health at `http://localhost:3847/health` |
+| 🔴 **Red** | Context Manager is not running | Start services with `C:\context-manager\cm-restart.bat` |
+
+### How to use the tray icon
+
+1. **Right-click** the colored circle in your system tray
+2. A menu appears with options:
+
+| Menu item | What it does |
+|-----------|-------------|
+| **Status** | Shows a popup with current system status |
+| **Hard RAM Reset (Emergency)** | Clears all cached memory and restarts from scratch |
+| **🌐 Tunnel** | Manages external access to your Context Manager (see below) |
+| **Quit** | Closes the tray icon (services keep running) |
+
+### Using the Tunnel
+
+The tunnel allows external AI tools (Claude, Perplexity, ChatGPT, Grok) to connect to your Context Manager from anywhere.
+
+**Start the tunnel:**
+1. Right-click the tray icon → **🌐 Tunnel** → **▶ Start Tunnel**
+2. Wait a few seconds — the icon will show a notification when the tunnel is ready
+3. The tunnel submenu will show Active with the tunnel URL
+
+**Copy URLs for your AI tools:**
+1. Right-click the tray icon → **🌐 Tunnel**
+2. You will see a list of configured services (Perplexity, Claude, Grok, etc.)
+3. Click on a service → **📋 Copy URL** — the URL is copied to your clipboard
+4. If needed, also click **📋 Copy Token** — the auth token is copied
+5. Paste these into your AI tool's MCP configuration
+
+**Stop the tunnel:**
+1. Right-click the tray icon → **🌐 Tunnel** → **■ Stop Tunnel**
+
+**Restart the tunnel (if something isn't working):**
+1. Right-click the tray icon → **🌐 Tunnel** → **↺ Restart Tunnel**
+
+**Emergency kill (if tunnel gets stuck):**
+1. Right-click the tray icon → **🌐 Tunnel** → **✕ Force Kill Tunnel**
+
+> **Tip:** After starting the tunnel once, it stays running even if you close the tray icon. You can check tunnel status anytime.
+
+---
+
 ## Stopping and starting services
 
 ### Stop all services
