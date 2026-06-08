@@ -357,13 +357,13 @@ Auth: Bearer Token (or OAuth)
 
 ```
 URL:  https://<your-tunnel>/mcp/chatgpt
-Auth: Bearer Token
+Auth: OAuth (automatic)
 ```
 
 **Setup:**
 1. Open ChatGPT → **Settings** → **Connectors** → **Add**
 2. Paste the copied URL (path `/mcp/chatgpt`)
-3. Click **🔑 Copy Token** in the tray and paste it in the Token field
+3. ChatGPT will automatically perform OAuth — follow the browser prompts
 4. Save
 
 ### Grok (xAI)

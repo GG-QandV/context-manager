@@ -381,14 +381,14 @@ Auth: Bearer Token (або OAuth)
 
 ```
 URL:  https://<ваш-тунель>/mcp/chatgpt
-Auth: Bearer Token
+Auth: OAuth (автоматично)
 ```
 
 **Налаштування:**
 
 1. Відкрийте ChatGPT → **Settings** → **Connectors** → **Add**
 2. Вставте скопійований URL (шлях `/mcp/chatgpt`)
-3. Натисніть **🔑 Copy Token** в треї та вставте його в поле Token
+3. ChatGPT автоматично виконає OAuth — слідуйте підказкам браузера
 4. Збережіть
 
 ### Grok (xAI)
