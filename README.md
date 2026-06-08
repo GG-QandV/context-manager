@@ -42,37 +42,68 @@ Runs on **Windows, Linux, and macOS**. No cloud required. No Docker required on 
 
 ## Quick start
 
-### Windows 10/11
+### Windows 10/11 (recommended)
 
-Open **PowerShell as Administrator** and run:
+> **New to this?** See the [step-by-step usage guide](docs/USAGE_GUIDE_EN.md) ([українською](docs/USAGE_GUIDE_UK.md)) — written for non-technical users with screenshots and plain language.
+
+**One-click install** — open **PowerShell as Administrator** and run:
 
 ```powershell
 irm https://raw.githubusercontent.com/GG-QandV/context-manager/master/scripts/install-native.ps1 | iex
 ```
 
-This installs everything: PostgreSQL, Qdrant, the ONNX embedder, Context Manager itself, and the watchdog service. All registered as Windows services via nssm — they start automatically on boot, restart if they crash.
+This installs everything automatically:
+- **PostgreSQL** — stores your context data
+- **Qdrant** — fast vector search across stored context
+- **ONNX embedder** — runs AI embeddings locally (no cloud, no API keys)
+- **Context Manager API** — the main service
+- **MCP adapter** — connects to Claude Desktop, Cursor, and other AI tools
+- **Watchdog** — monitors all services, restarts if something crashes
 
-**What you get:**
-| Component | What it does | Port |
-|-----------|-------------|------|
-| PostgreSQL | Stores context as structured data | 5432 |
-| Qdrant | Vector search across stored context | 6333 |
-| ONNX embedder | Turns text into embeddings (multilingual-e5-small, no cloud) | 8080 |
-| Context Manager API | The main service you talk to | 3847 |
-| MCP adapter | HTTP transport for MCP clients | 8770 |
-| Watchdog | Monitors everything, restarts failures | — |
+All registered as Windows services — they start on boot and survive restarts.
 
-**Verify it's running:**
+**What gets installed:**
+| Component | What it does | Port | Can I stop it? |
+|-----------|-------------|------|----------------|
+| PostgreSQL | Saves your context to database | 5432 | Only if you know what you're doing |
+| Qdrant | Finds related context when you search | 6333 | Only if you know what you're doing |
+| ONNX embedder | Turns text into numbers for search | 8080 | Takes ~60s to restart (loads AI model) |
+| Context Manager API | The brain — you talk to this | 3847 | Use `cm-off.bat` to stop all |
+| MCP adapter | Bridge between AI tools and Context Manager | 8770 | Use `cm-off.bat` to stop all |
+| Watchdog | Guardian — restarts crashed services | — | Don't stop this |
+
+**After install — verify it works:**
 ```powershell
+# Check if everything is healthy
 curl http://localhost:3847/health
+
+# You should see: {"status":"healthy","postgresql":"connected","qdrant":"connected",...}
 ```
 
-**Connect your agent:**
+**Connect your AI tool (Claude Desktop, Cursor, etc.):**
 ```powershell
+# Run this from the project folder (C:\context-manager)
 node scripts/init-mcp-config.mjs
+
+# Then restart your AI tool — it will find Context Manager automatically
 ```
 
-Then point Claude Desktop or Antigravity to the generated `mcp.json`.
+**Useful commands:**
+```powershell
+# Stop all Context Manager services
+C:\context-manager\cm-off.bat
+
+# Restart all services
+C:\context-manager\cm-restart.bat
+
+# Check service status
+Get-Service cm-*, cm-qdrant, cm-embed
+
+# View logs (if something goes wrong)
+notepad C:\ProgramData\nssm\logs\cm-api.log
+```
+
+> **Having trouble?** Check the [troubleshooting section](#troubleshooting) below, or see the [full usage guide](docs/USAGE_GUIDE_EN.md).
 
 ### Linux (Docker)
 
@@ -188,6 +219,28 @@ mcp/
 scripts/            Install, uninstall, MCP config generation
 docs/               Presentations, architecture, adaptation guides
 ```
+
+---
+
+## Troubleshooting
+
+### Common issues on Windows
+
+| Problem | Solution |
+|---------|----------|
+| **"externally-managed-environment" error during install** | Python 3.12+ blocks global installs. The installer should handle this automatically. If it doesn't, run: `python -m venv C:\context-manager\embed\.venv` then re-run the installer. |
+| **Services don't start after reboot** | Wait 30 seconds — ONNX model takes time to load. Check: `Get-Service cm-*` in PowerShell. |
+| **"Port already in use" error** | Another program is using the port. Stop PostgreSQL/Qdrant from other apps, or change ports in `C:\context-manager\.env`. |
+| **`curl http://localhost:3847/health` returns nothing** | Services are still starting. Wait 60 seconds and try again. Check logs: `notepad C:\ProgramData\nssm\logs\cm-api.log` |
+| **Claude Desktop doesn't see Context Manager** | Run `node scripts/init-mcp-config.mjs` from `C:\context-manager`, then restart Claude Desktop. |
+| **I want to uninstall** | Stop services: `C:\context-manager\cm-off.bat`. Delete `C:\context-manager\` and `C:\qdrant\`. Remove nssm services: `nssm remove cm-api confirm` (repeat for each service name). |
+
+### Getting help
+
+- **Logs location:** `C:\ProgramData\nssm\logs\cm-*.log`
+- **Config file:** `C:\context-manager\.env`
+- **Health check:** `curl http://localhost:3847/health`
+- **GitHub Issues:** [github.com/GG-QandV/context-manager/issues](https://github.com/GG-QandV/context-manager/issues)
 
 ---
 
