@@ -1,8 +1,8 @@
 """
-ONNX Embedder — замена TEI для Windows 10/11.
-API-совместим с HuggingFace TEI: POST /embed {inputs} → [[float]]
+ONNX Embedder — TEI replacement for Windows 10/11.
+API compatible with HuggingFace TEI: POST /embed {inputs} → [[float]]
 
-Спека: docs/SPEC_ONNX_EMBEDDER.md
+Spec: docs/SPEC_ONNX_EMBEDDER.md
 """
 import os
 import logging
@@ -27,7 +27,7 @@ MAX_LEN   = int(os.getenv("MAX_SEQ_LEN", "512"))
 
 app = FastAPI(title="ONNX Embedder")
 
-# ── Глобальные объекты (инициализируются при старте) ─────────────────────────
+# ── Global objects (initialized on startup) ─────────────────────────
 _tokenizer: Tokenizer | None = None
 _session: ort.InferenceSession | None = None
 _input_names: list[str] = []
@@ -44,7 +44,7 @@ def _load_model() -> None:
     _tokenizer.enable_padding(pad_id=0, pad_token="[PAD]", length=None)
     _tokenizer.enable_truncation(max_length=MAX_LEN)
 
-    # Пробуем quantized/optimized модель, потом обычную
+    # Try quantized/optimized model first, then the default one
     for name in ("model_optimized.onnx", "model_quantized.onnx", "model.onnx"):
         onnx_path = MODEL_DIR / name
         if onnx_path.exists():
@@ -53,8 +53,8 @@ def _load_model() -> None:
         raise FileNotFoundError(f"No .onnx model file found in {MODEL_DIR}")
 
     opts = ort.SessionOptions()
-    opts.enable_cpu_mem_arena = False   # предотвращает неконтролируемый рост RSS
-    opts.enable_mem_pattern = False     # предотвращает неконтролируемый рост RSS
+    opts.enable_cpu_mem_arena = False   # prevents uncontrolled RSS growth
+    opts.enable_mem_pattern = False     # prevents uncontrolled RSS growth
     opts.inter_op_num_threads = int(os.getenv("ORT_INTER_THREADS", "2"))
     opts.intra_op_num_threads = int(os.getenv("ORT_INTRA_THREADS", "4"))
     opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
@@ -66,10 +66,10 @@ def _load_model() -> None:
 
 
 def _mean_pool(last_hidden: np.ndarray, attention_mask: np.ndarray) -> np.ndarray:
-    """Mean pooling с учётом маски (как в TEI --pooling mean).
+    """Mean pooling taking mask into account (similar to TEI --pooling mean).
 
-    Почему attention_mask: padding-токены не должны вносить вклад в усреднение.
-    Без маски вектор короткого текста будет "разбавлен" нулями от паддинга.
+    Why attention_mask: padding tokens must not contribute to the average.
+    Without a mask, the vector of a short text will be diluted with zeros from padding.
     """
     mask = attention_mask[..., np.newaxis].astype(np.float32)
     summed = (last_hidden * mask).sum(axis=1)
@@ -78,9 +78,9 @@ def _mean_pool(last_hidden: np.ndarray, attention_mask: np.ndarray) -> np.ndarra
 
 
 def _normalize(vectors: np.ndarray) -> np.ndarray:
-    """L2 нормализация (TEI делает это по умолчанию для /embed endpoint).
+    """L2 normalization (TEI does this by default for the /embed endpoint).
 
-    Обязательно: без нормализации cosine similarity в Qdrant будет неверной.
+    Mandatory: without normalization, cosine similarity in Qdrant will be incorrect.
     """
     norms = np.linalg.norm(vectors, axis=1, keepdims=True).clip(min=1e-9)
     return vectors / norms
@@ -95,7 +95,7 @@ def _embed(texts: list[str]) -> list[list[float]]:
     attention_mask = np.array([e.attention_mask for e in encoded], dtype=np.int64)
     token_type_ids = np.zeros_like(input_ids,                      dtype=np.int64)
 
-    # Подаём только те inputs которые модель ожидает (разные ONNX exports отличаются)
+    # Feed only inputs expected by the model (different ONNX exports vary)
     feed: dict = {}
     if "input_ids"      in _input_names: feed["input_ids"]      = input_ids
     if "attention_mask" in _input_names: feed["attention_mask"] = attention_mask

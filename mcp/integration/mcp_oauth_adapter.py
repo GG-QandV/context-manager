@@ -42,13 +42,13 @@ from starlette.responses import (
 )
 from starlette.routing import Route
 
-from mcp.integration.common import (
+from cm_integration.common import (
     IFLOW_DIR,
     TOKEN,
     PrivateNetworkAccessMiddleware,
     safe_cm_call,
 )
-from mcp.integration.mcp_sse_adapter import TOOLS as _TOOLS
+from cm_integration.mcp_sse_adapter import TOOLS as _TOOLS
 
 logger = logging.getLogger("context_manager.integration.mcp_oauth_adapter")
 
@@ -250,7 +250,7 @@ def _make_mcp_server() -> Server:
     @srv.call_tool()
     async def call_tool(name: str, arguments: dict) -> list[TextContent]:
         # Emulated call
-        from mcp.integration.mcp_sse_adapter import _make_mcp_server as _make
+        from cm_integration.mcp_sse_adapter import _make_mcp_server as _make
         real_server = _make()
         return await real_server.call_tool(name, arguments)
 

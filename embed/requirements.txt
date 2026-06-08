@@ -1,6 +1,6 @@
 # ONNX Embedder — Python dependencies
-# Спека: docs/SPEC_ONNX_EMBEDDER.md
-# Установка: pip install -r embed/requirements.txt
+# Spec: docs/SPEC_ONNX_EMBEDDER.md
+# Installation: pip install -r embed/requirements.txt
 
 onnxruntime>=1.17.0
 tokenizers>=0.19.0

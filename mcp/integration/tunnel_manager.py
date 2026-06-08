@@ -9,9 +9,9 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from mcp.integration.common import IFLOW_DIR
-from mcp.integration.tunnel_providers import ServeoTunnelManager
-from mcp.integration.tunnel_state import (
+from cm_integration.common import IFLOW_DIR
+from cm_integration.tunnel_providers import ServeoTunnelManager
+from cm_integration.tunnel_state import (
     _kill_port_occupants,
     get_tunnel_token,
     get_tunnel_url,
@@ -127,7 +127,7 @@ async def run(provider: str = "serveo") -> None:
 
     adapter_env = {**os.environ, "CONFIG_DIR": str(IFLOW_DIR)}
     adapter_proc: asyncio.subprocess.Process = await asyncio.create_subprocess_exec(
-        py_exec, "-m", "mcp.integration.mcp_oauth_adapter",
+        py_exec, "-m", "cm_integration.mcp_oauth_adapter",
         "--port", str(ADAPTER_PORT),
         "--public-url", public_url,
         env=adapter_env,

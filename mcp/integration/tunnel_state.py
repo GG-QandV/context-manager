@@ -12,7 +12,7 @@ from enum import Enum
 from pathlib import Path
 from typing import NamedTuple
 
-from mcp.integration.common import IFLOW_DIR
+from cm_integration.common import IFLOW_DIR
 
 logger = logging.getLogger("context_manager.tunnel.state")
 
@@ -292,7 +292,7 @@ def get_tunnel_url() -> str | None:
 
 def get_tunnel_token() -> str | None:
     try:
-        from mcp.integration.common import TOKEN
+        from cm_integration.common import TOKEN
         return TOKEN
     except Exception as e:
         logger.warning("tunnel_token read error: %s", e)

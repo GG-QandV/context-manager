@@ -14,54 +14,54 @@ function Write-Warn($text) {
 }
 
 # -----------------------------------------------------------------------------
-Write-Step "0. Подготовка проекта (Клонирование/Загрузка)"
-# Если скрипт запущен не из папки проекта (например, через Invoke-Expression из сети)
+Write-Step "0. Project Setup (Cloning/Downloading)"
+# If script is not run from the project folder (e.g. run via network Invoke-Expression)
 if (-not (Test-Path "package.json")) {
-    Write-Warn "Файлы проекта не найдены в текущей директории."
+    Write-Warn "Project files not found in the current directory."
     $targetDir = "C:\context-manager"
     
     if (-not $DryRun) {
-        Write-Host "Скачиваем проект с GitHub..."
+        Write-Host "Downloading project from GitHub..."
         $repoZip = "$env:TEMP\context-manager-main.zip"
         
         try {
             Invoke-WebRequest -Uri $RepoZipUrl -OutFile $repoZip
-            Write-Host "Распаковка архива..."
+            Write-Host "Extracting archive..."
             Expand-Archive -Path $repoZip -DestinationPath "C:\" -Force
             Remove-Item $repoZip
             
-            # GitHub ZIP обычно содержит папку 'название_репо-main'
+            # GitHub ZIP usually contains 'repo-name-main' folder
             $extractedFolder = Get-ChildItem "C:\" -Directory | Where-Object { $_.Name -match "context-manager.*" } | Select-Object -First 1
             if ($extractedFolder -and $extractedFolder.FullName -ne $targetDir) {
                 if (Test-Path $targetDir) { Remove-Item -Recurse -Force $targetDir }
                 Rename-Item $extractedFolder.FullName $targetDir
             }
         } catch {
-            Write-Host "Не удалось автоматически скачать проект. Запустите скрипт из папки проекта." -ForegroundColor Red
+            Write-Host "Failed to download the project automatically. Please run this script from the project directory." -ForegroundColor Red
             exit 1
         }
         
         Set-Location $targetDir
-        Write-Host "Перешли в $targetDir" -ForegroundColor Green
+        Write-Host "Switched location to $targetDir" -ForegroundColor Green
     }
 } else {
-    Write-Host "Проект найден локально. Продолжаем установку..." -ForegroundColor Green
+    Write-Host "Project found locally. Proceeding with installation..." -ForegroundColor Green
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "1. Установка базовых зависимостей (winget)"
+Write-Step "1. Installing Core Dependencies (winget)"
 function Install-Dependency($name, $wingetId, $cmdToCheck) {
     $found = Get-Command $cmdToCheck -ErrorAction SilentlyContinue
     if (-not $found) {
-        Write-Warn "$name не найден. Запускаю winget для установки..."
+        Write-Warn "$name not found. Launching winget for installation..."
         if (-not $DryRun) {
             winget install --id $wingetId --accept-package-agreements --accept-source-agreements
-            # Обновляем PATH в текущей сессии
+            # Update PATH for the current session
             $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
         }
     } else {
-        Write-Host "$name уже установлен: $($found.Source)" -ForegroundColor Green
+        Write-Host "$name already installed: $($found.Source)" -ForegroundColor Green
     }
 }
 
@@ -71,10 +71,10 @@ Install-Dependency "NSSM" "nssm" "nssm"
 
 
 # -----------------------------------------------------------------------------
-Write-Step "2. Тихая установка PostgreSQL"
+Write-Step "2. Silent Installation of PostgreSQL"
 $psqlFound = Get-Command "psql" -ErrorAction SilentlyContinue
 
-# Функция для генерации случайного безопасного пароля
+# Function to generate a random safe database password
 function Get-RandomPassword {
     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
     $pass = ""
@@ -85,19 +85,19 @@ function Get-RandomPassword {
 $pgPassword = ""
 
 if (-not $psqlFound) {
-    Write-Host "PostgreSQL не найден. Выполняю тихую установку (Unattended Mode)..." -ForegroundColor Yellow
+    Write-Host "PostgreSQL not found. Performing silent installation (Unattended Mode)..." -ForegroundColor Yellow
     if (-not $DryRun) {
         $pgPassword = Get-RandomPassword
-        Write-Host "Сгенерирован безопасный пароль для БД." -ForegroundColor Cyan
+        Write-Host "Generated a secure database password." -ForegroundColor Cyan
         
-        # Запускаем EDB Installer полностью в фоне с передачей пароля
+        # Run EDB Installer completely in background passing the superuser password
         $overrideArgs = "--mode unattended --unattendedmodeui none --superpassword ""$pgPassword"" --serverport 5432"
         winget install --id PostgreSQL.PostgreSQL --silent --accept-package-agreements --accept-source-agreements --override $overrideArgs
         
         $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
-        Write-Host "PostgreSQL установлен успешно." -ForegroundColor Green
+        Write-Host "PostgreSQL installed successfully." -ForegroundColor Green
         
-        # Сохраняем пароль и инструкцию по смене в отдельный файл
+        # Save credentials and change password instructions in a separate file
         $credsFile = "C:\context-manager\postgres_credentials.txt"
         $credsContent = @"
 Auto-generated password for PostgreSQL (user: postgres):
@@ -125,18 +125,18 @@ nssm restart cm-api
 Write-Host "Password successfully changed and service restarted." -ForegroundColor Green
 "@
         Set-Content -Path $credsFile -Value $credsContent
-        Write-Host "Пароль сохранен в $credsFile" -ForegroundColor Cyan
+        Write-Host "Credentials saved to $credsFile" -ForegroundColor Cyan
     }
 } else {
-    Write-Host "PostgreSQL уже установлен." -ForegroundColor Green
-    # Если PostgreSQL уже был, пароль мы сгенерировать не можем, придётся спросить, но только если .env ещё нет
+    Write-Host "PostgreSQL already installed." -ForegroundColor Green
+    # If PG is already installed, we cannot generate password, we will prompt if .env doesn't exist
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "3. Загрузка Qdrant (Векторная БД)"
+Write-Step "3. Downloading Qdrant (Vector DB)"
 if (-not (Test-Path "C:\qdrant\qdrant.exe")) {
-    Write-Host "Скачиваем Qdrant..." -ForegroundColor Yellow
+    Write-Host "Downloading Qdrant..." -ForegroundColor Yellow
     if (-not $DryRun) {
         New-Item -ItemType Directory -Force -Path "C:\qdrant" | Out-Null
         $qdrantUrl = "https://github.com/qdrant/qdrant/releases/latest/download/qdrant-x86_64-pc-windows-msvc.zip"
@@ -144,14 +144,14 @@ if (-not (Test-Path "C:\qdrant\qdrant.exe")) {
         Invoke-WebRequest -Uri $qdrantUrl -OutFile $qdrantZip
         Expand-Archive -Path $qdrantZip -DestinationPath "C:\qdrant" -Force
         Remove-Item $qdrantZip
-        Write-Host "Qdrant успешно установлен в C:\qdrant" -ForegroundColor Green
+        Write-Host "Qdrant successfully installed to C:\qdrant" -ForegroundColor Green
     }
 } else {
-    Write-Host "Qdrant уже скачан: C:\qdrant\qdrant.exe" -ForegroundColor Green
+    Write-Host "Qdrant already downloaded: C:\qdrant\qdrant.exe" -ForegroundColor Green
 }
 
 
-# Получаем пути после обновления PATH
+# Resolve paths after PATH updates
 $pythonPath = (Get-Command "python" -ErrorAction SilentlyContinue).Source
 $nodePath = (Get-Command "node" -ErrorAction SilentlyContinue).Source
 if (-not $pythonPath) { $pythonPath = "python" }
@@ -159,28 +159,28 @@ if (-not $nodePath) { $nodePath = "node" }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "4. Сборка проекта (Node.js)"
+Write-Step "4. Project Build (Node.js)"
 if ($DryRun) {
     Write-Host "[DryRun] npm install && npm run build"
 } else {
-    Write-Host "Установка NPM пакетов..."
+    Write-Host "Installing NPM packages..."
     cmd /c "npm install"
     if ($LASTEXITCODE -ne 0) { Write-Host "npm install failed." -ForegroundColor Red; exit 1 }
     
-    Write-Host "Компиляция TypeScript..."
+    Write-Host "Compiling TypeScript..."
     cmd /c "npm run build"
     if ($LASTEXITCODE -ne 0) { Write-Host "npm run build failed." -ForegroundColor Red; exit 1 }
     
     if (-not (Test-Path "dist/index.js")) {
-        Write-Host "ERROR: dist/index.js не создан." -ForegroundColor Red
+        Write-Host "ERROR: dist/index.js not created." -ForegroundColor Red
         exit 1
     }
-    Write-Host "Сборка завершена успешно." -ForegroundColor Green
+    Write-Host "Build completed successfully." -ForegroundColor Green
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "5. Инициализация MCP конфигурации"
+Write-Step "5. Initializing MCP configuration"
 if ($DryRun) {
     Write-Host "[DryRun] node scripts/init-mcp-config.mjs"
 } else {
@@ -190,7 +190,7 @@ if ($DryRun) {
 
 
 # -----------------------------------------------------------------------------
-Write-Step "6. Установка Python зависимостей (для ONNX Embedder)"
+Write-Step "6. Installing Python dependencies (for ONNX Embedder)"
 if ($DryRun) {
     Write-Host "[DryRun] pip install -r embed/requirements.txt"
 } else {
@@ -200,7 +200,7 @@ if ($DryRun) {
 
 
 # -----------------------------------------------------------------------------
-Write-Step "7. Загрузка ONNX модели эмбеддингов"
+Write-Step "7. Downloading ONNX embedding model"
 $modelDir = "C:\context-manager\models\multilingual-e5-small_Q8\onnx"
 if (-not $DryRun) {
     New-Item -ItemType Directory -Force -Path $modelDir | Out-Null
@@ -210,48 +210,48 @@ if (-not $DryRun) {
 if ($DryRun) {
     Write-Host "[DryRun] scripts/download-model.ps1"
 } else {
-    Write-Host "Загружаем модель intfloat/multilingual-e5-small..." -ForegroundColor Cyan
-    Write-Warn "Регистрация на HuggingFace для этой публичной модели НЕ ТРЕБУЕТСЯ."
+    Write-Host "Downloading model intfloat/multilingual-e5-small..." -ForegroundColor Cyan
+    Write-Warn "No HuggingFace registration is required for this public model."
     
     $onnxFiles = Get-ChildItem $modelDir -Filter "*.onnx" -ErrorAction SilentlyContinue
     if ($onnxFiles.Count -gt 0) {
-        Write-Host "Модель уже существует в $modelDir" -ForegroundColor Yellow
+        Write-Host "Model already exists in $modelDir" -ForegroundColor Yellow
     } else {
         powershell -ExecutionPolicy Bypass -File scripts/download-model.ps1
-        if ($LASTEXITCODE -ne 0) { Write-Host "Ошибка загрузки модели." -ForegroundColor Red; exit 1 }
+        if ($LASTEXITCODE -ne 0) { Write-Host "Failed to download the model." -ForegroundColor Red; exit 1 }
     }
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "8. Настройка окружения (.env)"
+Write-Step "8. Setting up environment (.env)"
 if ($DryRun) {
-    Write-Host "[DryRun] Создание .env и настройка DATABASE_URL"
+    Write-Host "[DryRun] Creating .env and setting up DATABASE_URL"
 } else {
     if (-not (Test-Path ".env")) {
         if (-not (Test-Path ".env.windows")) {
-            Write-Host "ОШИБКА: .env.windows не найден в проекте." -ForegroundColor Red
+            Write-Host "ERROR: .env.windows not found in the project." -ForegroundColor Red
             exit 1
         }
         
-        # Если мы сами только что поставили PG, у нас есть пароль. Если нет — просим ввести.
+        # If we just installed PG ourselves, we have the password. Otherwise, ask.
         if ($pgPassword -eq "") {
-            $pwd = Read-Host "У вас уже был установлен PostgreSQL. Введите пароль пользователя 'postgres'" -AsSecureString
+            $pwd = Read-Host "PostgreSQL was already installed. Enter password for 'postgres' user" -AsSecureString
             $pgPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($pwd))
         }
         
         $envContent = Get-Content ".env.windows" -Raw
         $envContent = $envContent -replace "YOURPASSWORD", $pgPassword
         Set-Content -Path ".env" -Value $envContent
-        Write-Host "Файл .env успешно создан (пароль интегрирован)." -ForegroundColor Green
+        Write-Host ".env file successfully created (password integrated)." -ForegroundColor Green
     } else {
-        Write-Host ".env уже существует, пропускаем создание." -ForegroundColor Yellow
+        Write-Host ".env already exists, skipping creation." -ForegroundColor Yellow
     }
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "9. Регистрация Windows служб (nssm)"
+Write-Step "9. Registering Windows services (nssm)"
 $services = @(
     @{ Name = "cm-qdrant"; Exe = "C:\qdrant\qdrant.exe"; Args = "--uri http://127.0.0.1:6333"; Dir = "C:\qdrant"; Env = @() },
     @{ Name = "cm-embed"; Exe = $pythonPath; Args = "-m uvicorn embed_server:app --host 127.0.0.1 --port 8080"; Dir = "C:\context-manager\embed"; Env = @("MODEL_DIR=C:\context-manager\models\multilingual-e5-small_Q8\onnx") },
@@ -261,15 +261,15 @@ $services = @(
 )
 
 foreach ($svc in $services) {
-    if ($DryRun) { Write-Host "[DryRun] Установка службы: $($svc.Name)"; continue }
+    if ($DryRun) { Write-Host "[DryRun] Installing service: $($svc.Name)"; continue }
     
     nssm status $svc.Name 2>$null | Out-Null
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "$($svc.Name) уже зарегистрирована, пропускаем." -ForegroundColor Yellow
+        Write-Host "$($svc.Name) already registered, skipping." -ForegroundColor Yellow
         continue
     }
     
-    Write-Host "Установка службы $($svc.Name)..."
+    Write-Host "Installing service $($svc.Name)..."
     nssm install $svc.Name $svc.Exe | Out-Null
     if ($svc.Args) { nssm set $svc.Name AppParameters $svc.Args | Out-Null }
     nssm set $svc.Name AppDirectory $svc.Dir | Out-Null
@@ -278,24 +278,24 @@ foreach ($svc in $services) {
     nssm set $svc.Name AppStdout "C:\ProgramData\nssm\logs\$($svc.Name).log" | Out-Null
     nssm set $svc.Name AppStderr "C:\ProgramData\nssm\logs\$($svc.Name)-err.log" | Out-Null
     nssm set $svc.Name Start SERVICE_AUTO_START | Out-Null
-    Write-Host "Служба $($svc.Name) зарегистрирована." -ForegroundColor Green
+    Write-Host "Service $($svc.Name) successfully registered." -ForegroundColor Green
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "10. Запуск служб"
+Write-Step "10. Starting services"
 if ($DryRun) {
     Write-Host "[DryRun] nssm start <all_services>"
 } else {
     foreach ($svc in $services) {
-        Write-Host "Запуск $($svc.Name)..."
+        Write-Host "Starting $($svc.Name)..."
         nssm start $svc.Name | Out-Null
     }
 }
 
 
 # -----------------------------------------------------------------------------
-Write-Step "11. Проверка портов (Smoke tests)"
+Write-Step "11. Checking ports (Smoke tests)"
 $ports = @(
     @{ Port = 5432; Name = "PostgreSQL" },
     @{ Port = 6333; Name = "Qdrant" },
@@ -305,32 +305,32 @@ $ports = @(
 )
 
 if (-not $DryRun) {
-    Write-Host "Ожидание 5 секунд для запуска служб..."
+    Write-Host "Waiting 5 seconds for services to initialize..."
     Start-Sleep -Seconds 5
 }
 
 foreach ($p in $ports) {
     if ($DryRun) {
-        Write-Host "[DryRun] Тест порта $($p.Port) ($($p.Name))"
+        Write-Host "[DryRun] Port test $($p.Port) ($($p.Name))"
         continue
     }
     
     $tcp = New-Object System.Net.Sockets.TcpClient
     try {
         $tcp.Connect("127.0.0.1", $p.Port)
-        Write-Host "Порт $($p.Port) ($($p.Name)): Работает (OK)" -ForegroundColor Green
+        Write-Host "Port $($p.Port) ($($p.Name)): Working (OK)" -ForegroundColor Green
         $tcp.Close()
     } catch {
-        Write-Host "Порт $($p.Port) ($($p.Name)): ОШИБКА (FAIL)" -ForegroundColor Red
+        Write-Host "Port $($p.Port) ($($p.Name)): ERROR (FAIL)" -ForegroundColor Red
     }
 }
 
-Write-Step "12. Создание кнопок-ярлыков (BAT-файлов)"
+Write-Step "12. Creating BAT shortcuts"
 if (-not $DryRun) {
     $batOff = "C:\context-manager\cm-off.bat"
     $batOffContent = @"
 @echo off
-:: Проверка прав администратора
+:: Check Administrator privileges
 net session >nul 2>&1
 if %errorLevel% == 0 (
     echo Stopping Context Manager services...
@@ -351,7 +351,7 @@ if %errorLevel% == 0 (
     $batRestart = "C:\context-manager\cm-restart.bat"
     $batRestartContent = @"
 @echo off
-:: Проверка прав администратора
+:: Check Administrator privileges
 net session >nul 2>&1
 if %errorLevel% == 0 (
     echo Restarting Context Manager services...
@@ -368,7 +368,7 @@ if %errorLevel% == 0 (
 )
 "@
     Set-Content -Path $batRestart -Value $batRestartContent
-    Write-Host "Созданы исполняемые файлы $batOff и $batRestart" -ForegroundColor Green
+    Write-Host "Created executable batch files: $batOff and $batRestart" -ForegroundColor Green
 }
 
-Write-Host "`nУстановка успешно завершена! Система Context Manager готова к работе." -ForegroundColor Cyan
+Write-Host "`nInstallation successfully completed! Context Manager is ready for use." -ForegroundColor Cyan

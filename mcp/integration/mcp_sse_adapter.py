@@ -18,7 +18,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
-from mcp.integration.common import (
+from cm_integration.common import (
     IFLOW_DIR,
     TOKEN,
     PrivateNetworkAccessMiddleware,

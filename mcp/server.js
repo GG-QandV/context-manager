@@ -284,4 +284,7 @@ Commands:
   }
 });
 
-await server.connect(new StdioServerTransport());
+server.connect(new StdioServerTransport()).catch((error) => {
+  console.error("Fatal error starting MCP server:", error);
+  process.exit(1);
+});

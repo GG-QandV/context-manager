@@ -8,7 +8,7 @@ Write-Host "Target: $ModelDir" -ForegroundColor Gray
 
 New-Item -ItemType Directory -Force -Path $ModelDir | Out-Null
 
-# Проверить что huggingface_hub установлен
+# Verify if huggingface_hub is installed
 python -c "import huggingface_hub" 2>$null
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Installing huggingface_hub..." -ForegroundColor Yellow

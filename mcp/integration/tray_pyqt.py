@@ -21,8 +21,8 @@ from PyQt6.QtCore import QSize, QTimer
 from PyQt6.QtGui import QColor, QIcon, QPainter, QPixmap
 from PyQt6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
 
-from mcp.integration.common import IFLOW_DIR, TOKEN
-from mcp.integration.tunnel_state import (
+from cm_integration.common import IFLOW_DIR, TOKEN
+from cm_integration.tunnel_state import (
     TunnelState,
     _kill_port_occupants,
     force_kill_tunnel,
@@ -30,7 +30,7 @@ from mcp.integration.tunnel_state import (
     kill_orphan_tunnel_processes,
     read_snapshot,
 )
-from mcp.integration.ui_meta import get_meta
+from cm_integration.ui_meta import get_meta
 
 logger = logging.getLogger("context_manager.tray")
 
@@ -118,11 +118,11 @@ _COLOURS = {
 }
 
 _LABELS = {
-    _ST_PROCESSING: "Context Manager: Active [Активен]",
-    _ST_CONNECTED: "Context Manager: Connected [Подключен]",
-    _ST_IDLE: "Context Manager: Online [Готов]",
-    _ST_WARNING: "Context Manager: MCP Adapter Offline [Ошибка MCP]",
-    _ST_ERROR: "Context Manager: API Offline [Сервис отключен]",
+    _ST_PROCESSING: "Context Manager: Active",
+    _ST_CONNECTED: "Context Manager: Connected",
+    _ST_IDLE: "Context Manager: Online",
+    _ST_WARNING: "Context Manager: MCP Adapter Offline",
+    _ST_ERROR: "Context Manager: API Offline",
 }
 
 _SIZE = 64
@@ -189,7 +189,7 @@ def _detect_status() -> str:
 
 
 def resolve_cm_executable() -> list[str]:
-    return [sys.executable, "-m", "mcp.integration.tunnel_manager"]
+    return [sys.executable, "-m", "cm_integration.tunnel_manager"]
 
 
 class DaemonTrayApp(QApplication):
@@ -256,7 +256,7 @@ class DaemonTrayApp(QApplication):
 
         if s == TunnelState.ACTIVE and url:
             try:
-                from mcp.integration.mcp_oauth_adapter import load_route_config
+                from cm_integration.mcp_oauth_adapter import load_route_config
                 routes = load_route_config().routes
             except Exception as e:
                 logger.warning("tray tunnel menu: failed to load routes.json: %s", e)
@@ -314,7 +314,7 @@ class DaemonTrayApp(QApplication):
                 if Path(pyw_exec).exists():
                     py_exec = pyw_exec
             
-            cmd = [py_exec, "-m", "mcp.integration.tunnel_manager"]
+            cmd = [py_exec, "-m", "cm_integration.tunnel_manager"]
             _run_headless(cmd)
             ok = _wait_for_adapter(OAUTH_PORT)
             if not ok:

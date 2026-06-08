@@ -24,7 +24,7 @@ import threading
 from pathlib import Path
 from typing import Any
 
-from mcp.integration.common import IFLOW_DIR
+from cm_integration.common import IFLOW_DIR
 
 logger = logging.getLogger("context_manager.tunnel.providers.serveo")
 

@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cm-integration"
+version = "1.0.0"
+description = "Context Manager — Python tray and tunnel integration layer"
+requires-python = ">=3.11"
+# Dependencies are already installed via embed/requirements.txt — do not duplicate here
+
+[tool.setuptools]
+packages = ["cm_integration"]
+
+[tool.setuptools.package-dir]
+# Source files are in mcp/integration/, Python sees this namespace as cm_integration.*
+cm_integration = "."
+
+[tool.setuptools.package-data]
+# Icons are copied to site-packages alongside .py files.
+# tray_pyqt.py loads them using Path(__file__).parent / "icons"
+cm_integration = ["icons/*"]

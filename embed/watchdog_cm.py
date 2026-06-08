@@ -1,8 +1,8 @@
 """
-Context Manager Windows Watchdog — health-check всех сервисов + nssm restart.
+Context Manager Windows Watchdog — health check of all services + nssm restart.
 
-Спека: docs/WIN10_ARCHITECTURE_DESIGN.md → секция "Watchdog"
-nssm конфиг: nssm install cm-watchdog C:\\Python312\\python.exe
+Spec: docs/WIN10_ARCHITECTURE_DESIGN.md -> section "Watchdog"
+nssm config: nssm install cm-watchdog C:\\Python312\\python.exe
               nssm set cm-watchdog AppParameters watchdog_cm.py
               nssm set cm-watchdog AppDirectory C:\\context-manager\\embed
 """
@@ -16,8 +16,8 @@ import os
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger("watchdog")
 
-# Сервисы для мониторинга.
-# nssm=None означает что сервис управляется Windows напрямую (не через nssm) — рестарт не делаем.
+# Services for monitoring.
+# nssm=None means the service is managed by Windows directly (not via nssm) - no restart.
 SERVICES: list[dict] = [
     {"name": "PostgreSQL",  "nssm": None,          "port": 5432, "type": "tcp"},
     {"name": "cm-qdrant",   "nssm": "cm-qdrant",   "port": 6333, "type": "http", "path": "/health"},
@@ -30,7 +30,7 @@ INTERVAL_SEC = int(os.getenv("WD_INTERVAL", "10"))
 
 
 def tcp_ok(port: int, timeout: float = 3.0) -> bool:
-    """Проверяет что TCP порт принимает соединения."""
+    """Check if TCP port accepts connections."""
     try:
         with socket.create_connection(("127.0.0.1", port), timeout=timeout):
             return True
@@ -39,10 +39,10 @@ def tcp_ok(port: int, timeout: float = 3.0) -> bool:
 
 
 def http_ok(port: int, path: str, timeout: float = 3.0) -> bool:
-    """Проверяет что HTTP endpoint возвращает статус < 500.
+    """Check if HTTP endpoint returns status < 500.
 
-    Не проверяем конкретный body — CM возвращает {"status":"healthy"|"degraded"},
-    embedder возвращает {"status":"ok"}. Оба валидны пока не 5xx.
+    Do not verify the exact body — CM returns {"status":"healthy"|"degraded"},
+    embedder returns {"status":"ok"}. Both are valid as long as it is not 5xx.
     """
     try:
         url = f"http://127.0.0.1:{port}{path}"
@@ -53,7 +53,7 @@ def http_ok(port: int, path: str, timeout: float = 3.0) -> bool:
 
 
 def nssm_restart(svc: str) -> None:
-    """Перезапускает nssm-сервис. Логирует результат."""
+    """Restart nssm service. Log the result."""
     logger.warning(f"Restarting service: {svc}")
     result = subprocess.run(["nssm", "restart", svc], capture_output=True, text=True)
     if result.returncode != 0:

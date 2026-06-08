@@ -1,13 +1,13 @@
 # =============================================================================
 # change-pg-password.ps1
-# Context Manager — скрипт смены пароля PostgreSQL
+# Context Manager — PostgreSQL password change script
 #
-# Запускать от Администратора.
-# Скрипт:
-#   1. Запрашивает новый пароль
-#   2. Применяет его в PostgreSQL (ALTER USER)
-#   3. Обновляет .env файл
-#   4. Перезапускает сервис cm-api
+# Must be run as Administrator.
+# This script:
+#   1. Prompts for a new password
+#   2. Applies it in PostgreSQL (ALTER USER)
+#   3. Updates the .env file
+#   4. Restarts the cm-api service
 # =============================================================================
 
 #Requires -RunAsAdministrator
@@ -16,31 +16,31 @@ $ErrorActionPreference = "Continue"
 $DataDir = Join-Path $env:ProgramData "Context Manager"
 $EnvFile = Join-Path $DataDir "app\.env"
 
-# --- Проверяем что .env существует ------------------------------------------
+# --- Check if .env exists ----------------------------------------------------
 if (-not (Test-Path $EnvFile)) {
-    Write-Host "ОШИБКА: файл .env не найден: $EnvFile" -ForegroundColor Red
-    Write-Host "Убедитесь что Context Manager установлен корректно." -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "ERROR: .env file not found: $EnvFile" -ForegroundColor Red
+    Write-Host "Please make sure Context Manager is installed correctly." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
-# --- Получаем текущий пароль из .env ----------------------------------------
+# --- Extract current password from .env ---------------------------------------
 $envContent = Get-Content $EnvFile -Raw
 $match = [regex]::Match($envContent, 'postgresql://postgres:([^@]+)@')
 if (-not $match.Success) {
-    Write-Host "ОШИБКА: не удалось найти DATABASE_URL в .env" -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "ERROR: Could not find DATABASE_URL in .env" -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 $currentPassword = $match.Groups[1].Value
 
 Write-Host ""
-Write-Host "=== Context Manager — Смена пароля PostgreSQL ===" -ForegroundColor Cyan
+Write-Host "=== Context Manager — Change PostgreSQL Password ===" -ForegroundColor Cyan
 Write-Host ""
 
-# --- Запрашиваем новый пароль -----------------------------------------------
-$newPasswordSecure = Read-Host "Введите новый пароль" -AsSecureString
-$confirmSecure     = Read-Host "Подтвердите пароль" -AsSecureString
+# --- Prompt for new password --------------------------------------------------
+$newPasswordSecure = Read-Host "Enter new password" -AsSecureString
+$confirmSecure     = Read-Host "Confirm new password" -AsSecureString
 
 $newPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
     [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($newPasswordSecure)
@@ -50,20 +50,20 @@ $confirm = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
 )
 
 if ($newPassword -ne $confirm) {
-    Write-Host "ОШИБКА: пароли не совпадают." -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "ERROR: Passwords do not match." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
 if ($newPassword.Length -lt 8) {
-    Write-Host "ОШИБКА: пароль должен быть не менее 8 символов." -ForegroundColor Red
-    Read-Host "Нажмите Enter для выхода"
+    Write-Host "ERROR: Password must be at least 8 characters long." -ForegroundColor Red
+    Read-Host "Press Enter to exit"
     exit 1
 }
 
-# --- Применяем пароль в PostgreSQL ------------------------------------------
+# --- Apply password in PostgreSQL ---------------------------------------------
 Write-Host ""
-Write-Host "Применяем новый пароль в PostgreSQL..." -ForegroundColor Yellow
+Write-Host "Applying new password in PostgreSQL..." -ForegroundColor Yellow
 
 $env:PGPASSWORD = $currentPassword
 $pgResult = & psql -U postgres -h 127.0.0.1 -p 5432 `
@@ -71,20 +71,44 @@ $pgResult = & psql -U postgres -h 127.0.0.1 -p 5432 `
 Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "ОШИБКА при изменении пароля в PostgreSQL:" -ForegroundColor Red
+    Write-Host "ERROR changing password in PostgreSQL." -ForegroundColor Red
     Write-Host $pgResult -ForegroundColor Red
     Write-Host ""
-    Write-Host "Возможные причины:" -ForegroundColor Yellow
-    Write-Host "  - PostgreSQL не запущен (проверьте services.msc)" -ForegroundColor Yellow
-    Write-Host "  - Текущий пароль в .env не совпадает с реальным паролем PG" -ForegroundColor Yellow
-    Read-Host "Нажмите Enter для выхода"
-    exit 1
+    Write-Host "If PostgreSQL was pre-installed on this machine, its password might be different." -ForegroundColor Yellow
+    $fallback = Read-Host "Do you want to configure Context Manager to use your existing PostgreSQL password without changing it? (y/n)"
+    if ($fallback -eq "y" -or $fallback -eq "Y") {
+        $existingSecure = Read-Host "Enter your existing PostgreSQL password" -AsSecureString
+        $existingPassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto(
+            [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($existingSecure)
+        )
+        
+        Write-Host "Testing connection with the provided password..." -ForegroundColor Yellow
+        $env:PGPASSWORD = $existingPassword
+        $testResult = & psql -U postgres -h 127.0.0.1 -p 5432 -c "SELECT 1;" 2>&1
+        Remove-Item Env:\PGPASSWORD -ErrorAction SilentlyContinue
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Host "✓ Connection successful. Setting new password to your existing password." -ForegroundColor Green
+            $newPassword = $existingPassword
+        } else {
+            Write-Host "ERROR: Connection test failed with the provided password:" -ForegroundColor Red
+            Write-Host $testResult -ForegroundColor Red
+            Read-Host "Press Enter to exit"
+            exit 1
+        }
+    } else {
+        Write-Host "Possible reasons:" -ForegroundColor Yellow
+        Write-Host "  - PostgreSQL is not running (check services.msc)" -ForegroundColor Yellow
+        Write-Host "  - The current password in .env does not match the actual PG password" -ForegroundColor Yellow
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
+} else {
+    Write-Host "✓ Password successfully changed in PostgreSQL." -ForegroundColor Green
 }
 
-Write-Host "✓ Пароль в PostgreSQL изменён." -ForegroundColor Green
-
-# --- Обновляем .env файл ----------------------------------------------------
-Write-Host "Обновляем .env файл..." -ForegroundColor Yellow
+# --- Update .env file ---------------------------------------------------------
+Write-Host "Updating .env file..." -ForegroundColor Yellow
 
 $newEnvContent = $envContent -replace `
     '(postgresql://postgres:)[^@]+(@)', `
@@ -92,51 +116,71 @@ $newEnvContent = $envContent -replace `
 
 Set-Content -Path $EnvFile -Value $newEnvContent -Encoding UTF8 -NoNewline
 
-Write-Host "✓ .env файл обновлён." -ForegroundColor Green
+Write-Host "✓ .env file updated." -ForegroundColor Green
 
-# --- Обновляем postgres_credentials.txt -------------------------------------
+# --- Update postgres_credentials.txt ------------------------------------------
 $credsPath = Join-Path $DataDir "postgres_credentials.txt"
 if (Test-Path $credsPath) {
     $credsContent = Get-Content $credsPath -Raw
     $credsContent = $credsContent -replace '( Password : ).*', "`${1}$newPassword"
     Set-Content -Path $credsPath -Value $credsContent -Encoding UTF8 -NoNewline
-    Write-Host "✓ postgres_credentials.txt обновлён." -ForegroundColor Green
+    Write-Host "✓ postgres_credentials.txt updated." -ForegroundColor Green
 }
 
-# --- Перезапускаем сервис cm-api -------------------------------------------
-Write-Host "Перезапускаем cm-api..." -ForegroundColor Yellow
+# --- Restart cm-api service --------------------------------------------------
+Write-Host "Restarting cm-api..." -ForegroundColor Yellow
+
+# Update registry AppEnvironmentExtra for cm-api to set the new database password
+try {
+    $regPath = "HKLM:\SYSTEM\CurrentControlSet\Services\cm-api\Parameters"
+    if (Test-Path $regPath) {
+        $envExtra = Get-ItemProperty -Path $regPath -Name "AppEnvironmentExtra" -ErrorAction Stop
+        $newEnvExtra = @()
+        foreach ($line in $envExtra.AppEnvironmentExtra) {
+            if ($line -match "^DATABASE_URL=") {
+                $newEnvExtra += "DATABASE_URL=postgresql://postgres:$newPassword@127.0.0.1:5432/context_db"
+            } else {
+                $newEnvExtra += $line
+            }
+        }
+        Set-ItemProperty -Path $regPath -Name "AppEnvironmentExtra" -Value $newEnvExtra -Type MultiString -ErrorAction Stop
+        Write-Host "✓ Registry service environment updated." -ForegroundColor Green
+    }
+} catch {
+    Write-Host "WARNING: Failed to update service registry environment: $_" -ForegroundColor Yellow
+}
 
 $nssmPath = Join-Path $env:ProgramFiles "Context Manager\bin\nssm.exe"
 if (Test-Path $nssmPath) {
     & $nssmPath restart cm-api | Out-Null
     Start-Sleep -Seconds 3
 
-    # Проверяем что сервис поднялся
+    # Check if the service is up
     $tcp = New-Object System.Net.Sockets.TcpClient
     try {
         $tcp.Connect("127.0.0.1", 3847)
         $tcp.Close()
-        Write-Host "✓ cm-api перезапущен и отвечает на порту 3847." -ForegroundColor Green
+        Write-Host "✓ cm-api restarted and responding on port 3847." -ForegroundColor Green
     } catch {
-        Write-Host "ПРЕДУПРЕЖДЕНИЕ: cm-api не отвечает на порту 3847." -ForegroundColor Yellow
-        Write-Host "Проверьте статус в services.msc или логи:" -ForegroundColor Yellow
+        Write-Host "WARNING: cm-api is not responding on port 3847." -ForegroundColor Yellow
+        Write-Host "Please check status in services.msc or logs:" -ForegroundColor Yellow
         Write-Host "  $DataDir\logs\cm-api.log" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "ПРЕДУПРЕЖДЕНИЕ: nssm.exe не найден, перезапустите cm-api вручную." -ForegroundColor Yellow
+    Write-Host "WARNING: nssm.exe not found, please restart cm-api manually." -ForegroundColor Yellow
 }
 
-# --- Финальный вывод --------------------------------------------------------
+# --- Final Output -------------------------------------------------------------
 Write-Host ""
 Write-Host "=================================================" -ForegroundColor Cyan
-Write-Host " Пароль успешно изменён!" -ForegroundColor Green
+Write-Host " Password successfully changed!" -ForegroundColor Green
 Write-Host "=================================================" -ForegroundColor Cyan
 Write-Host ""
-Write-Host " Новые данные для подключения:" -ForegroundColor White
+Write-Host " New connection details:" -ForegroundColor White
 Write-Host "   Host     : 127.0.0.1:5432" -ForegroundColor White
 Write-Host "   User     : postgres" -ForegroundColor White
 Write-Host "   Password : $newPassword" -ForegroundColor White
 Write-Host "   Database : context_db" -ForegroundColor White
 Write-Host ""
 
-Read-Host "Нажмите Enter для закрытия"
+Read-Host "Press Enter to close"
