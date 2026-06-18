@@ -24,6 +24,8 @@ async function start() {
 
     const worker = startSyncWorker();
     stopSyncWorker = worker.stop;
+
+    checkFailedSyncRecords();
   } catch (err) {
     app.log.error(err);
     process.exit(1);
@@ -60,5 +62,19 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
+
+async function checkFailedSyncRecords() {
+  try {
+    const result = await postgresService.executeRawQuery(
+      "SELECT COUNT(*) as cnt FROM development_context WHERE sync_status='failed'"
+    );
+    const count = parseInt(result.rows[0]?.cnt || '0', 10);
+    if (count > 0) {
+      console.warn(`⚠ Found ${count} record(s) with sync_status='failed'. Run resync_qdrant.py to re-sync.`);
+    }
+  } catch (err) {
+    console.error('Failed to check sync_status:', err);
+  }
+}
 
 start();
