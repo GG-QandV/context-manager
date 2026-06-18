@@ -649,6 +649,16 @@ export class PostgresService {
    async executeRawQuery(query: string, params: (string | number | boolean | null)[] = []) {
     return await this.pool.query(query, params);
   }
+
+  async getAllSyncedSyncIds(): Promise<string[]> {
+    const result = await this.pool.query<{ sync_id: string }>(
+      `SELECT sync_id FROM development_context
+       WHERE sync_status = 'synced'
+       ORDER BY sync_id
+       LIMIT 10000`
+    );
+    return result.rows.map(r => r.sync_id);
+  }
 }
 
 export const postgresService = new PostgresService();

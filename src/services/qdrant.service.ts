@@ -2,6 +2,11 @@ import { QdrantClient } from '@qdrant/js-client-rest';
 import { config } from '../config';
 import { embeddingService } from './embedding.service';
 import { ContextRecord, SemanticSearchResult, QdrantFilter, getMeta } from '../types';
+
+interface QdrantPointPayload {
+  syncId?: string;
+  [key: string]: unknown;
+}
 import { SaveContextBody, SemanticSearchBody } from '../schemas/context.schema';
 import crypto from 'crypto';
 
@@ -177,6 +182,36 @@ class QdrantService {
         score: hit.score
       };
     });
+  }
+  async getAllDistinctSyncIds(): Promise<string[]> {
+    const syncIds = new Set<string>();
+    let offset: unknown = 0;
+
+    while (offset !== undefined) {
+      const result = (await (this.client as any).scroll(this.collectionName, {
+        limit: 1000,
+        offset,
+        with_payload: true,
+      })) as { points: Array<{ payload: QdrantPointPayload }>; next_page_offset?: unknown };
+
+      for (const point of result.points) {
+        const payload = point.payload;
+        const syncId = payload?.syncId;
+        if (syncId) {
+          syncIds.add(String(syncId));
+        }
+      }
+
+      const next = result.next_page_offset;
+      if (next !== undefined && next !== null && typeof next === 'number') {
+        if (next === 0) break;
+        offset = next;
+      } else {
+        offset = undefined;
+      }
+    }
+
+    return Array.from(syncIds);
   }
 }
 

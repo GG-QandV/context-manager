@@ -4,6 +4,7 @@ import { healthRoutes } from './routes/health.routes';
 import { contextRoutes } from './routes/context.routes';
 import { searchRoutes } from './routes/search.routes';
 import { syncRoutes } from './routes/sync.routes';
+import { auditRoutes } from './routes/audit.routes';
 import { errorHandler } from './middleware/error-handler';
 
 const isDev = process.env.NODE_ENV === 'development';
@@ -38,6 +39,7 @@ app.register(healthRoutes);
 app.register(contextRoutes);
 app.register(searchRoutes);
 app.register(syncRoutes);
+app.register(auditRoutes);
 
 // SSE endpoint для MCP
 app.get("/", async (req, reply) => {
