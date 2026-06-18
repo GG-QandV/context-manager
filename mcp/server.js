@@ -194,15 +194,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_query') {
       const res = await axios.post(`${API_BASE}/query`, {
-        filters: {
-          agent: args.agent || detectedAgent,
-          sessionId: args.session,
-          date: args.date
-        },
-        mode: args.mode || 'im'
+        agent: args.agent || detectedAgent,
+        session_id: args.session,
+        date_from: args.date,
       });
-      
-      const records = res.data.records || res.data.items || [];
+
+      const records = res.data.results || [];
       if (!records.length) {
         return { content: [{ type: 'text', text: 'No records' }] };
       }

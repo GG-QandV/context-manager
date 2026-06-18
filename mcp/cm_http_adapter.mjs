@@ -73,10 +73,11 @@ function makeServer() {
       }
       if (name === 'cm_query') {
         const r = await axios.post(`${API_BASE}/query`, {
-          filters: { agent, sessionId: args.session, date: args.date },
-          mode: args.mode || 'im',
+          agent: args.agent || agent,
+          session_id: args.session,
+          date_from: args.date,
         });
-        const records = r.data.records || r.data.items || [];
+        const records = r.data.results || [];
         if (!records.length) return { content: [{ type: 'text', text: 'No records' }] };
         const text = records.map((x, i) =>
           `${i+1}. ${x.created_at || x.createdAt} - ${x.summary || x.content.slice(0,100)}`

@@ -211,14 +211,11 @@ def _make_mcp_server() -> Server:
 
             elif name == "cm_query":
                 r = await safe_cm_call("POST", "/query", {
-                    "filters": {
-                        "agent": agent,
-                        "sessionId": arguments.get("session"),
-                        "date": arguments.get("date")
-                    },
-                    "mode": arguments.get("mode", "im")
+                    "agent": arguments.get("agent") or agent,
+                    "session_id": arguments.get("session"),
+                    "date_from": arguments.get("date"),
                 })
-                records = r.get("records") or r.get("items") or []
+                records = r.get("results") or []
                 if not records:
                     return [TextContent(type="text", text="No records")]
                 out = []
