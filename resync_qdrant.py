@@ -24,8 +24,8 @@ PG_USER = os.getenv("PG_USER", "postgres")
 PG_PASS = os.getenv("PG_PASS", "")
 
 
-TEI_URL     = "http://localhost:8080"
-QDRANT_URL  = "http://localhost:6333"
+TEI_URL     = os.getenv("TEI_URL", "http://localhost:8080")
+QDRANT_URL  = os.getenv("QDRANT_URL", "http://localhost:6333")
 COLLECTION  = "DevelopmentContext"
 
 BATCH_SIZE  = 4   # stay under max-concurrent-requests 8
