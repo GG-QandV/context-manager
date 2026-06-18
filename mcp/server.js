@@ -128,14 +128,24 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-  const detectedAgent = process.env.MCP_CLIENT_NAME || args.agent || 'unknown';
+  const argsAgent  = args.agent  !== undefined ? String(args.agent)  : undefined;
+  const argsDate   = args.date   !== undefined ? String(args.date)   : undefined;
+  const argsMode   = args.mode   !== undefined ? String(args.mode)   : undefined;
+  const argsSession = args.session !== undefined ? String(args.session) : undefined;
+  const argsQ      = args.q      !== undefined ? String(args.q)      : undefined;
+  const argsFrom   = args.from   !== undefined ? String(args.from)   : undefined;
+  const argsN      = args.n      !== undefined ? Number(args.n)      : 5;
+  const argsSessionId = args.session_id !== undefined ? String(args.session_id) : undefined;
+  const argsContent  = args.content  !== undefined ? String(args.content)  : undefined;
+  const argsTopics   = args.topics   !== undefined ? String(args.topics)   : undefined;
+  const detectedAgent = process.env.MCP_CLIENT_NAME || argsAgent || 'unknown';
   
   try {
     if (name === 'cm_save_br') {
       await axios.post(`${API_BASE}/save`, {
-        sessionId: args.session_id || 'default',
+        sessionId: argsSessionId || 'default',
         contextType: 'note',
-        content: args.content,
+        content: argsContent,
         logicalSection: 'shared',
         agent: detectedAgent,
         metadata: { agent: detectedAgent, mode: 'brief' }
@@ -145,21 +155,21 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_save_im') {
       await axios.post(`${API_BASE}/save`, {
-        sessionId: args.session_id || 'default',
+        sessionId: argsSessionId || 'default',
         contextType: 'note',
-        content: args.content,
+        content: argsContent,
         logicalSection: 'shared',
         agent: detectedAgent,
-        metadata: { agent: detectedAgent, mode: 'important', topics: args.topics }
+        metadata: { agent: detectedAgent, mode: 'important', topics: argsTopics }
       });
       return { content: [{ type: 'text', text: 'Saved (important)' }] };
     }
 
     if (name === 'cm_save_fl') {
       await axios.post(`${API_BASE}/save`, {
-        sessionId: args.session_id || 'default',
+        sessionId: argsSessionId || 'default',
         contextType: 'note',
-        content: args.content,
+        content: argsContent,
         logicalSection: 'shared',
         agent: detectedAgent,
         metadata: { agent: detectedAgent, mode: 'full' }
@@ -168,11 +178,16 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     if (name === 'cm_search') {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const searchFilters = argsAgent
+        ? { agent: argsAgent }
+        : { date_from: thirtyDaysAgo };
+
       const res = await axios.post(`${API_BASE}/semantic-search`, {
-        query: args.q,
-        limit: args.n || 5,
-        filters: { agent: args.agent || detectedAgent },
-        mode: args.mode
+        query: argsQ,
+        limit: argsN,
+        filters: searchFilters,
+        mode: argsMode
       });
       
       const results = res.data.results || res.data.items || [];
@@ -180,7 +195,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         return { content: [{ type: 'text', text: 'No results' }] };
       }
       
-      const mode = args.mode || 'im';
+      const mode = argsMode || 'im';
       const compact = results.map((r, i) => {
         const content = mode === 'br' ? (r.summary || r.content.substring(0,200)) : 
                         mode === 'fl' ? r.content : 
@@ -194,9 +209,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_query') {
       const res = await axios.post(`${API_BASE}/query`, {
-        agent: args.agent || detectedAgent,
-        session_id: args.session,
-        date_from: args.date,
+        agent: argsAgent,
+        session_id: argsSession,
+        date_from: argsDate,
       });
 
       const records = res.data.results || [];
@@ -205,7 +220,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       }
       
       const compact = records.map((r, i) => 
-        `${i+1}. ${r.created_at || r.createdAt} - ${r.summary || r.content.substring(0, 100)}`
+        `${i+1}. ${r.created_at || r.createdAt} - ${r.content_brief || r.content_full?.substring(0, 100) || r.content_important?.substring(0, 100) || ''}`
       ).join('\n');
       
       return { content: [{ type: 'text', text: compact }] };
@@ -213,23 +228,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_cross') {
       const res = await axios.post(`${API_BASE}/semantic-search`, {
-        query: args.q,
-        limit: args.n || 5,
-        filters: { agent: args.from },
-        mode: args.mode
+        query: argsQ,
+        limit: argsN,
+        filters: { agent: argsFrom },
+        mode: argsMode
       });
       
       const results = res.data.results || res.data.items || [];
       if (!results.length) {
-        return { content: [{ type: 'text', text: `No results in ${args.from} context` }] };
+        return { content: [{ type: 'text', text: `No results in ${argsFrom} context` }] };
       }
       
-      const mode = args.mode || 'im';
+      const mode = argsMode || 'im';
       const compact = results.map((r, i) => {
         const content = mode === 'br' ? (r.summary || r.content.substring(0,200)) : 
                         mode === 'fl' ? r.content : 
                         r.content.substring(0, 500);
-        return `${i+1}. [${args.from}] ${content}`;
+        return `${i+1}. [${argsFrom}] ${content}`;
       }).join('\n\n');
       
       return { content: [{ type: 'text', text: compact }] };
@@ -244,7 +259,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_stats') {
       const res = await axios.get(`${API_BASE}/stats`, {
-        params: { agent: args.agent || detectedAgent, session: args.session }
+        params: { agent: argsAgent || detectedAgent, session: argsSession }
       });
 
       const s = res.data.stats || {};
@@ -254,7 +269,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     if (name === 'cm_export') {
       const res = await axios.get(`${API_BASE}/export`, {
-        params: { session: args.session, agent: args.agent || detectedAgent }
+        params: { session: argsSession, agent: argsAgent || detectedAgent }
       });
       return { content: [{ type: 'text', text: JSON.stringify(res.data, null, 2) }] };
     }
