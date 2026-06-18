@@ -1,42 +1,45 @@
 import { app } from './app';
 import { config } from './config';
 import { postgresService } from './services/postgres.service';
-// 1. ЗАМЕНА: импортируем qdrantService вместо weaviateService
-import { qdrantService } from './services/qdrant.service'; 
+import { qdrantService } from './services/qdrant.service';
 import { migrateLegacyConfig, migrateLegacyMcp } from './config/migration';
+import { startSyncWorker } from './workers/sync.worker';
+
+let stopSyncWorker: (() => void) | null = null;
 
 async function start() {
   try {
-    // Миграция конфига со старого пути ~/.iflow/
     await migrateLegacyConfig();
     await migrateLegacyMcp();
 
-    // 2. ЗАМЕНА: Инициализация схемы Qdrant
     console.log('Initializing Qdrant collection...');
-    await qdrantService.initializeSchema(); 
-    
-    // Start server
-    await app.listen({ 
-      port: config.port, 
-      host: config.host 
+    await qdrantService.initializeSchema();
+
+    await app.listen({
+      port: config.port,
+      host: config.host,
     });
-    
+
     console.log(`Context Manager server running on http://${config.host}:${config.port}`);
+
+    const worker = startSyncWorker();
+    stopSyncWorker = worker.stop;
   } catch (err) {
     app.log.error(err);
     process.exit(1);
   }
 }
 
-// Graceful shutdown
 async function shutdown(signal: string) {
   console.log(`\n${signal} received. Shutting down gracefully...`);
-  
+
+  if (stopSyncWorker) {
+    stopSyncWorker();
+  }
+
   try {
     await app.close();
     await postgresService.close();
-    // 3. СОВЕТ: Можно добавить закрытие клиента Qdrant, если нужно, 
-    // но обычно это не критично для rest-client
     console.log('Server closed successfully');
     process.exit(0);
   } catch (err) {

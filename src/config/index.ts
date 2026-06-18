@@ -22,6 +22,7 @@ export interface Config {
     dimensions: number;
   };
   sync: {
+    enabled: boolean;
     batchSize: number;
     intervalMs: number;
   };
@@ -69,6 +70,7 @@ function loadConfig(): Config {
     },
     
     sync: {
+      enabled: process.env.SYNC_ENABLED !== 'false',
       batchSize: parseInt(process.env.SYNC_BATCH_SIZE || '100', 10),
       intervalMs: parseInt(process.env.SYNC_INTERVAL_MS || '60000', 10),
     },
