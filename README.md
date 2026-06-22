@@ -25,6 +25,7 @@ Runs on **Windows, Linux, and macOS**. No cloud required. No Docker required on 
 
 - **[Architecture & MCP Integration — Dark](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation.html)** · [Light](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation-light.html)
 - **[Архітектура та MCP — темна](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation-uk.html)** · [світла](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation-light-uk.html)
+- **[Архитектура и MCP — тёмная](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation-ru.html)** · [светлая](https://htmlpreview.github.io/?https://github.com/GG-QandV/context-manager/blob/master/docs/cm-presentation/cm-presentation-light-ru.html)
 
 ---
 

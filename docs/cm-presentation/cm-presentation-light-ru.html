@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Context Manager — Постоянная память для AI-агентов (Light)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    color: #2d3748;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #f0f4f8;
+    color: #2d3748;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+  ::selection { background: #7c3aed; color: #fff; }
+
+  .slide {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+  .slide::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.03) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  #title {
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(124,58,237,0.06) 0%, transparent 70%);
+  }
+  #title .badge {
+    display: inline-block;
+    padding: 6px 18px;
+    border: 1px solid rgba(124,58,237,0.4);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #a78bfa;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 30px;
+  }
+  #title h1 {
+    font-size: clamp(48px, 8vw, 96px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  #title .sub {
+    font-size: clamp(22px, 3vw, 36px);
+    font-weight: 300;
+    color: #4a5568;
+    margin-bottom: 40px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  #title .meta {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 14px;
+    color: #5a6a7a;
+    flex-wrap: wrap;
+  }
+  #title .meta span { display: flex; align-items: center; gap: 6px; }
+  #title .scroll-hint {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    animation: bounce 2s infinite;
+    color: #6b7280;
+    font-size: 13px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+
+  .section-number {
+    font-size: 12px;
+    font-weight: 600;
+    color: #7c3aed;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    color: #1a202c;
+    margin-bottom: 16px;
+  }
+  .section-desc {
+    font-size: 16px;
+    color: #4a5568;
+    max-width: 700px;
+    margin-bottom: 48px;
+  }
+
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .grid-4 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 28px 24px;
+    transition: all 0.3s ease;
+  }
+  .card:hover {
+    background: #f7fafc;
+    border-color: rgba(124,58,237,0.3);
+    transform: translateY(-2px);
+  }
+  .card .icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+  .card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a202c;
+    margin-bottom: 8px;
+  }
+  .card p {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.7;
+  }
+  .card .glossary {
+    display: block;
+    font-size: 12px;
+    color: #718096;
+    font-style: italic;
+    margin-top: 8px;
+    border-left: 2px solid rgba(124,58,237,0.3);
+    padding-left: 12px;
+  }
+  .card .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    margin-top: 10px;
+  }
+  .tag.purple { background: rgba(124,58,237,0.08); color: #6d28d9; }
+  .tag.blue { background: rgba(59,130,246,0.08); color: #2563eb; }
+  .tag.green { background: rgba(52,211,153,0.08); color: #059669; }
+  .tag.orange { background: rgba(251,146,60,0.08); color: #ea580c; }
+
+  .metric {
+    text-align: center;
+    padding: 24px;
+  }
+  .metric .value {
+    font-size: 36px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .metric .label {
+    font-size: 13px;
+    color: #718096;
+    margin-top: 4px;
+  }
+
+  /* Simple explanation block */
+  .explain {
+    font-size: 14px;
+    color: #4a5568;
+    max-width: 1100px;
+    padding: 16px 20px;
+    background: rgba(124,58,237,0.03);
+    border: 1px solid rgba(124,58,237,0.12);
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+  .explain strong {
+    color: #a78bfa;
+    font-weight: 500;
+  }
+
+  .news-banner {
+    background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(251,191,36,0.08) 100%);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-left: 4px solid #fbbf24;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-top: 32px;
+    width: 100%;
+    max-width: 1100px;
+  }
+  .news-banner .news-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #1a202c;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 3px 14px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+  .news-banner p {
+    font-size: 15px;
+    color: #4a5568;
+    margin: 0;
+    line-height: 1.7;
+  }
+  .news-banner strong {
+    color: #7c3aed;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 12px 0;
+  }
+  .feature-item .check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(52,211,153,0.1);
+    color: #059669;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .feature-item div { flex: 1; }
+  .feature-item strong { color: #1a202c; font-weight: 600; }
+  .feature-item span { color: #4a5568; font-size: 14px; }
+
+  .cmd-list {
+    width: 100%;
+    max-width: 1100px;
+    margin-bottom: 8px;
+  }
+  .cmd-list-header {
+    font-size: 13px;
+    font-weight: 600;
+    color: #7c3aed;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(124,58,237,0.15);
+  }
+  .cmd-item {
+    display: flex;
+    gap: 16px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(124,58,237,0.06);
+  }
+  .cmd-item:last-child {
+    border-bottom: none;
+  }
+  .cmd-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #7c3aed;
+    min-width: 130px;
+    flex-shrink: 0;
+  }
+  .cmd-desc {
+    font-size: 14px;
+    color: #4a5568;
+    line-height: 1.5;
+  }
+
+  .tool-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.2);
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #a78bfa;
+    margin: 3px;
+  }
+
+  .compat-table {
+    width: 100%;
+    max-width: 1100px;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .compat-table th {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #6b7280;
+    font-weight: 500;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .compat-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #edf2f7;
+    color: #4a5568;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+  .compat-table td:first-child { font-weight: 500; color: #1a202c; }
+  .status-ok { color: #34d399; }
+  .status-warn { color: #fbbf24; }
+  .status-err { color: #f87171; }
+
+  .glossary-term {
+    color: #a78bfa;
+    cursor: help;
+    border-bottom: 1px dashed rgba(124,58,237,0.3);
+  }
+
+  #end {
+    text-align: center;
+  }
+  #end h1 {
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #a78bfa, #34d399);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 20px;
+  }
+  #end p {
+    color: #4a5568;
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .nav-dots {
+    position: fixed;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+  }
+  .nav-dots a {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #d1d5db;
+    transition: all 0.3s;
+    display: block;
+  }
+  .nav-dots a:hover,
+  .nav-dots a.active {
+    background: #7c3aed;
+    transform: scale(1.3);
+  }
+
+  .slide-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 48px;
+    max-width: 1100px;
+    width: 100%;
+  }
+  .slide-nav a {
+    color: #7c3aed;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+  .slide-nav a:hover { color: #a78bfa; }
+
+  /* Architecture SVG */
+  .arch-svg-wrapper {
+    width: 100%;
+    max-width: 1100px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+    overflow-x: auto;
+    color-scheme: light;
+  }
+
+  @media (max-width: 768px) {
+    .slide { padding: 60px 24px; }
+    .nav-dots { right: 12px; }
+    .compat-table { font-size: 12px; }
+    .compat-table th,
+    .compat-table td { padding: 8px 10px; }
+  }
+  @media (max-width: 480px) {
+    .compat-table { font-size: 11px; }
+    .compat-table th,
+    .compat-table td { padding: 5px 6px; }
+  }
+
+/* SVG icon sizing */
+#title .meta span svg { width: 20px; height: 20px; margin-right: 4px; vertical-align: middle; }
+.card h3 svg { width: 22px; height: 22px; margin-right: 8px; vertical-align: middle; }
+#end div span svg { width: 18px; height: 18px; margin-right: 4px; vertical-align: middle; }
+.card .icon svg { width: 32px; height: 32px; margin: 0; }
+
+.cmd-card {
+  padding: 16px 20px;
+  margin-bottom: 10px;
+}
+.cmd-card .cmd-name {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+.cmd-card .cmd-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+</style>
+</head>
+<body>
+
+<div class="nav-dots">
+  <a href="#title" class="active"></a>
+  <a href="#about"></a>
+  <a href="#arch"></a>
+  <a href="#features"></a>
+  <a href="#mcp-tools"></a>
+  <a href="#metrics"></a>
+  <a href="#tech"></a>
+  <a href="#deploy"></a>
+  <a href="#compat"></a>
+  <a href="#end"></a>
+</div>
+
+<!-- SLIDE 1: TITLE -->
+<section class="slide" id="title">
+  <div class="badge">v2.3.2</div>
+  <h1>Context Manager</h1>
+  <p class="sub">Постоянная память для AI-помощников —<br>чтобы они не забывали, о чем вы говорили</p>
+  <p style="margin-top:-20px;margin-bottom:40px;color:#6b7280;font-size:16px;font-weight:300;">разработчик Евгений Нам</p>
+  <div class="meta">
+    <span><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M211.89,119.09a4,4,0,0,0-2.49-2.84l-60.81-22.8,15.33-76.67a4,4,0,0,0-6.84-3.51l-112,120a4,4,0,0,0-1,3.64,4,4,0,0,0,2.49,2.84l60.81,22.8L92.08,239.22a4,4,0,0,0,6.84,3.51l112-120A4,4,0,0,0,211.89,119.09ZM102.68,227l13.24-66.2a4,4,0,0,0-2.52-4.53L55,134.36,153.32,29l-13.24,66.2a4,4,0,0,0,2.52,4.53L201,121.64Z"/></svg> Node.js + Fastify</span>
+    <span><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M192.14,42.55C174.94,33.17,152.16,28,128,28S81.06,33.17,63.86,42.55C45.89,52.35,36,65.65,36,80v96c0,14.35,9.89,27.65,27.86,37.45,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c18-9.8,27.86-23.1,27.86-37.45V80C220,65.65,210.11,52.35,192.14,42.55ZM212,176c0,11.29-8.41,22.1-23.69,30.43C172.27,215.18,150.85,220,128,220s-44.27-4.82-60.31-13.57C52.41,198.1,44,187.29,44,176V149.48c4.69,5.93,11.37,11.34,19.86,16,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c8.49-4.63,15.17-10,19.86-16Zm0-48c0,11.29-8.41,22.1-23.69,30.43C172.27,167.18,150.85,172,128,172s-44.27-4.82-60.31-13.57C52.41,150.1,44,139.29,44,128V101.48c4.69,5.93,11.37,11.34,19.86,16,17.2,9.38,40,14.55,64.14,14.55s46.94-5.17,64.14-14.55c8.49-4.63,15.17-10,19.86-16Zm-23.69-17.57C172.27,119.18,150.85,124,128,124s-44.27-4.82-60.31-13.57C52.41,102.1,44,91.29,44,80s8.41-22.1,23.69-30.43C83.73,40.82,105.15,36,128,36s44.27,4.82,60.31,13.57C203.59,57.9,212,68.71,212,80S203.59,102.1,188.31,110.43Z"/></svg> PostgreSQL + Qdrant</span>
+    <span><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M244,124a52.1,52.1,0,0,0-32-48V72a44,44,0,0,0-84-18.3A44,44,0,0,0,44,72v4a52,52,0,0,0,0,96v4a44,44,0,0,0,84,18.3A44,44,0,0,0,212,176v-4A52.07,52.07,0,0,0,244,124ZM88,212a36,36,0,0,1-36-36v-1.41A52.13,52.13,0,0,0,64,176h8a4,4,0,0,0,0-8H64A44,44,0,0,1,49.33,82.5,4,4,0,0,0,52,78.73V72a36,36,0,0,1,72,0v78.75A44,44,0,0,0,88,132a4,4,0,0,0,0,8,36,36,0,0,1,0,72Zm104-44h-8a4,4,0,0,0,0,8h8a52.13,52.13,0,0,0,12-1.41V176a36,36,0,1,1-36-36,4,4,0,0,0,0-8,44,44,0,0,0-36,18.75V72a36,36,0,0,1,72,0v6.73a4,4,0,0,0,2.67,3.77A44,44,0,0,1,192,168Zm12-56a4,4,0,0,1-4,4h-4a32,32,0,0,1-32-32V80a4,4,0,0,1,8,0v4a24,24,0,0,0,24,24h4A4,4,0,0,1,204,112ZM92,84a32,32,0,0,1-32,32H56a4,4,0,0,1,0-8h4A24,24,0,0,0,84,84V80a4,4,0,0,1,8,0Z"/></svg> multilingual-e5-small</span>
+    <span><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M224,60H172V16a4,4,0,0,0-8,0V60H92V16a4,4,0,0,0-8,0V60H32.55C28.13,60,28,63.59,28,64a4,4,0,0,0,4,4H52v92a36,36,0,0,0,36,36h36v44a4,4,0,0,0,8,0V196h36a36,36,0,0,0,36-36V68h20a4,4,0,0,0,0-8ZM196,160a28,28,0,0,1-28,28H88a28,28,0,0,1-28-28V68H196Zm-87.29-29.72a4,4,0,0,1-.46-3.68l12-32a4,4,0,0,1,7.5,2.8l-10,26.6H144a4,4,0,0,1,3.75,5.4l-12,32a4,4,0,1,1-7.5-2.8l10-26.6H112A4,4,0,0,1,108.71,130.28Z"/></svg> Универсальный разъем (MCP)</span>
+  </div>
+  <div class="scroll-hint">↓ листайте</div>
+</section>
+
+<!-- SLIDE 2: ABOUT -->
+<section class="slide" id="about">
+  <div class="section-number">001</div>
+  <h2>Что такое Context Manager?</h2>
+  <p class="section-desc">Инструмент, который дает AI-помощникам память — словно записная книжка, куда они записывают то, что узнали, а затем могут найти это снова.</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="icon"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M244,124a52.1,52.1,0,0,0-32-48V72a44,44,0,0,0-84-18.3A44,44,0,0,0,44,72v4a52,52,0,0,0,0,96v4a44,44,0,0,0,84,18.3A44,44,0,0,0,212,176v-4A52.07,52.07,0,0,0,244,124ZM88,212a36,36,0,0,1-36-36v-1.41A52.13,52.13,0,0,0,64,176h8a4,4,0,0,0,0-8H64A44,44,0,0,1,49.33,82.5,4,4,0,0,0,52,78.73V72a36,36,0,0,1,72,0v78.75A44,44,0,0,0,88,132a4,4,0,0,0,0,8,36,36,0,0,1,0,72Zm104-44h-8a4,4,0,0,0,0,8h8a52.13,52.13,0,0,0,12-1.41V176a36,36,0,1,1-36-36,4,4,0,0,0,0-8,44,44,0,0,0-36,18.75V72a36,36,0,0,1,72,0v6.73a4,4,0,0,0,2.67,3.77A44,44,0,0,1,192,168Zm12-56a4,4,0,0,1-4,4h-4a32,32,0,0,1-32-32V80a4,4,0,0,1,8,0v4a24,24,0,0,0,24,24h4A4,4,0,0,1,204,112ZM92,84a32,32,0,0,1-32,32H56a4,4,0,0,1,0-8h4A24,24,0,0,0,84,84V80a4,4,0,0,1,8,0Z"/></svg></div>
+      <h3>Проблема</h3>
+      <p>Каждый раз, когда вы говорите с AI, он начинает с нуля. Он не помнит, что вы обсуждали вчера, на прошлой неделе — даже пять минут назад. Весь контекст теряется.</p>
+      <span class="glossary">Каждый разговор с AI начинается "с чистого листа" — предыдущий контекст теряется</span>
+    </div>
+    <div class="card">
+      <div class="icon"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M211.89,119.09a4,4,0,0,0-2.49-2.84l-60.81-22.8,15.33-76.67a4,4,0,0,0-6.84-3.51l-112,120a4,4,0,0,0-1,3.64,4,4,0,0,0,2.49,2.84l60.81,22.8L92.08,239.22a4,4,0,0,0,6.84,3.51l112-120A4,4,0,0,0,211.89,119.09ZM102.68,227l13.24-66.2a4,4,0,0,0-2.52-4.53L55,134.36,153.32,29l-13.24,66.2a4,4,0,0,0,2.52,4.53L201,121.64Z"/></svg></div>
+      <h3>Решение</h3>
+      <p>Context Manager сохраняет разговоры двумя способами: как обычный текст в базе данных (PostgreSQL), и как "цифровые отпечатки смысла" — числа, которые показывают, о чем именно шла речь.</p>
+      <span class="glossary">Сохранение в двух форматах: текст (для точного поиска) и "цифровой отпечаток смысла" (для поиска по похожим темам)</span>
+    </div>
+    <div class="card">
+      <div class="icon"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M218.26,84.89a100.16,100.16,0,1,1-22.44-30.37l25.35-25.35a4,4,0,1,1,5.66,5.66l-96,96a4,4,0,0,1-5.66-5.66l31-31a44,44,0,1,0,15.78,31.3,4,4,0,0,1,8-.46,52,52,0,1,1-18.1-36.51l28.34-28.33A92,92,0,0,0,63,193.05,92,92,0,0,0,211,88.33a4,4,0,1,1,7.22-3.44Z"/></svg></div>
+      <h3>Результат</h3>
+      <p>AI-помощники помнят прошлые разговоры, находят нужную информацию по смыслу и могут обмениваться контекстом между собой — без участия человека.</p>
+      <span class="glossary">AI-помощники помнят предыдущие разговоры и могут обмениваться информацией друг с другом</span>
+    </div>
+  </div>
+
+  <div class="explain">
+    <strong>Важное пояснение:</strong> Context Manager использует стандартный способ подключения под названием <strong>MCP</strong>.
+    Представьте MCP как <strong>универсальный разъем (стандарт подключения)</strong> — так же как любые наушники с 3.5mm jack подходят к любому телефону, любой AI-помощник, который поддерживает MCP, может подключиться к Context Manager.
+
+    Если ваш AI не поддерживает MCP, Context Manager также работает через обычный веб-адрес (HTTP — протокол передачи данных, по которому работают сайты).
+  </div>
+</section>
+
+<!-- SLIDE 3: ARCHITECTURE -->
+<section class="slide" id="arch">
+  <div class="section-number">002</div>
+  <h2>Как это работает</h2>
+  <p class="section-desc">Система имеет три логических слоя. Информация движется сверху вниз и в обратном направлении.</p>
+
+  <div class="arch-svg-wrapper">
+    <?xml version="1.0" encoding="UTF-8"?>
+<!-- Do not edit this file with editors other than draw.io -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg style="width:100%;max-width:900px;height:auto;display:block;margin:0 auto;border-radius:12px;" xmlns="http://www.w3.org/2000/svg" style="background: transparent; background-color: transparent;" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="812px" height="703px" viewBox="0 0 812 703" content="&lt;mxfile host=&quot;Electron&quot; scale=&quot;1&quot; border=&quot;0&quot;&gt;&#10;  &lt;diagram id=&quot;UzzrStIHESN_C7ycVm4h&quot; name=&quot;Страница-1&quot;&gt;&#10;    &lt;mxGraphModel dx=&quot;878&quot; dy=&quot;608&quot; grid=&quot;1&quot; gridSize=&quot;10&quot; guides=&quot;1&quot; tooltips=&quot;1&quot; connect=&quot;1&quot; arrows=&quot;1&quot; fold=&quot;1&quot; page=&quot;1&quot; pageScale=&quot;1&quot; pageWidth=&quot;1500&quot; pageHeight=&quot;680&quot; math=&quot;0&quot; shadow=&quot;0&quot; adaptiveColors=&quot;auto&quot;&gt;&#10;      &lt;root&gt;&#10;        &lt;mxCell id=&quot;0&quot; /&gt;&#10;        &lt;mxCell id=&quot;1&quot; parent=&quot;0&quot; /&gt;&#10;        &lt;mxCell id=&quot;flow&quot; parent=&quot;1&quot; style=&quot;text;html=1;fontSize=11;fontColor=#333333;align=center;fillColor=none;strokeColor=none;whiteSpace=wrap;labelBackgroundColor=#FFD966;labelBorderColor=#FFD966;&quot; value=&quot;Data flow (поток данных): API → PostgreSQL (save text) → TEI Embedder (convert to meaning) → Qdrant (store vector).(обе базы синхронизированы).&quot; vertex=&quot;1&quot;&gt;&#10;          &lt;mxGeometry height=&quot;30&quot; width=&quot;760&quot; x=&quot;30&quot; y=&quot;540&quot; as=&quot;geometry&quot; /&gt;&#10;        &lt;/mxCell&gt;&#10;        &lt;mxCell id=&quot;l1&quot; parent=&quot;1&quot; style=&quot;swimlane;horizontal=1;startSize=40;fillColor=#1a1a2e;strokeColor=#7c3aed;fontColor=#a78bfa;fontStyle=1;html=1;rounded=1;whiteSpace=wrap;labelBackgroundColor=none;swimlaneFillColor=#A9C4EB;&quot; value=&quot;&amp;lt;b&amp;gt;LAYER 1 — INTEGRATIONS (интеграции к клиентам которые использует пользователь)&amp;lt;/b&amp;gt;&amp;lt;... (line truncated to 2000 chars)
+  </div>
+
+  <div class="explain">
+    <strong>Как читать эту схему:</strong> Информация движется по шагам (1 → 2 → 3).
+
+    <strong>Слой 1</strong> — инструменты AI, которые вы используете (Antigravity, VS Code и т.д.).
+
+    <strong>Слой 2</strong> — "мозг" Context Manager, который обрабатывает запросы.
+
+    <strong>Слой 3</strong> — место, где живут данные:
+    • <strong>PostgreSQL (реляционная БД — данные в таблицах)</strong> — сохраняет разговор как текст.
+    ONNX Embedder</strong> — конвертирует текст в математический &quot;отпечаток
+    • <strong>Qdrant (векторная БД для поиска по смыслу)</strong> — сохраняет эти "отпечатки смысла" для быстрого поиска по смыслу.
+
+    <strong>Ключевой момент: обе базы данных синхронизированы.</strong> Когда вы сохраняете разговор, текст попадает в PostgreSQL, затем ONNX Embedder конвертирует его в вектор и сохраняет в Qdrant автоматически. Обе базы всегда содержат одни и те же данные — просто в разных форматах (текст vs цифровой отпечаток смысла).
+  </div>
+</section>
+
+<!-- SLIDE 4: FEATURES -->
+<section class="slide" id="features">
+  <div class="section-number">003</div>
+  <h2>Возможности</h2>
+  <p class="section-desc">Context Manager предлагает несколько инструментов — каждый выполняет одну конкретную задачу, словно кнопки на пульте дистанционного управления.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,36H48A12,12,0,0,0,36,48V208a12,12,0,0,0,12,12H208a12,12,0,0,0,12-12V48A12,12,0,0,0,208,36ZM48,44H208a4,4,0,0,1,4,4V156H179.31a12,12,0,0,0-8.48,3.51l-19.32,19.32a4,4,0,0,1-2.82,1.17H107.31a4,4,0,0,1-2.82-1.17L85.17,159.51A12,12,0,0,0,76.69,156H44V48A4,4,0,0,1,48,44ZM208,212H48a4,4,0,0,1-4-4V164H76.69a4,4,0,0,1,2.82,1.17l19.32,19.32a12,12,0,0,0,8.48,3.51h41.38a12,12,0,0,0,8.48-3.51l19.32-19.32a4,4,0,0,1,2.82-1.17H212v44A4,4,0,0,1,208,212Z"/></svg> Сохранение контекста</h3>
+      <p>Три уровня детализации, в зависимости от того, сколько вы хотите сохранить:</p>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Brief (кратко)</strong> <span>— автоматическая сводка разговора на 200-300 символов. Словно твит о том, что произошло.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Important (важное)</strong> <span>— структурированные заметки с темами, до 3 000 символов. Словно итог совещания.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Full (полностью)</strong> <span>— полный лог разговора дословно. Словно сохранить всю запись совещания.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M226.83,221.17l-52.7-52.7a84.1,84.1,0,1,0-5.66,5.66l52.7,52.7a4,4,0,0,0,5.66-5.66ZM36,112a76,76,0,1,1,76,76A76.08,76.08,0,0,1,36,112Z"/></svg> Поиск и анализ</h3>
+      <p>Находите прошлые разговоры разными способами:</p>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Semantic search (поиск по смыслу)</strong> <span>— находит разговоры по смыслу, даже если вы не помните точных слов. Например, поиск "проблемы с сервером" найдет разговоры об "ошибках подключения к базе данных".</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Filtered query (фильтр по параметрам)</strong> <span>— поиск с фильтрами: по дате, AI-агенту, режиму сохранения.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Cross-agent search (поиск между агентами)</strong> <span>— один AI-помощник может найти то, что записал другой AI-помощник.</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M228,208a4,4,0,0,1-4,4H32a4,4,0,0,1-4-4V48a4,4,0,0,1,8,0V151.19L93.37,101a4,4,0,0,1,5-.19l61.41,46.05L221.37,93a4,4,0,0,1,5.26,6l-64,56a4,4,0,0,1-5,.19l-61.41-46L36,161.81V204H224A4,4,0,0,1,228,208Z"/></svg> Мониторинг</h3>
+      <p>Просмотр того, что находится в системе памяти:</p>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Agent list (список агентов)</strong> <span>— показывает всех AI-помощников и количество сохраненных ими записей.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Statistics (статистика)</strong> <span>— детали о конкретном помощнике или сессии.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Export (экспорт)</strong> <span>— выгрузка сессии в JSON (текстовый формат, понятный программам).</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M223.05,70.5a4,4,0,0,0-6.42-1.44l-41.82,38.6L153,103l-4.68-21.79,38.6-41.82a4,4,0,0,0-1.44-6.43A68,68,0,0,0,98.94,126L36.4,180l-.21.2a28,28,0,0,0,39.6,39.6l.2-.21,54-62.54A68,68,0,0,0,228,96,67.51,67.51,0,0,0,223.05,70.5ZM160,156a60,60,0,0,1-29-7.47,4,4,0,0,0-5,.89L70,214.25A20,20,0,0,1,41.75,186l64.82-56a4,4,0,0,0,.89-5,60,60,0,0,1,69.46-86.59L141.05,77.29a4,4,0,0,0-1,3.55l5.66,26.35a4,4,0,0,0,3.07,3.07l26.35,5.66a4,4,0,0,0,3.55-1l38.87-35.87A60.05,60.05,0,0,1,160,156Z"/></svg> Встроенные помощники</h3>
+      <p>Умные инструменты, которые работают автоматически:</p>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Content Detector (определение типа содержимого)</strong> <span>— автоматически распознает, что именно читает: код, команды, таблицы или ошибки — и обрабатывает соответственно.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Time Parser (распознавание дат)</strong> <span>— понимает фразы "вчера", "последние 3 дня" на русском и английском.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Chunking (разделение текста на части)</strong> <span>— разбивает длинные тексты на меньшие куски для лучшего качества поиска.</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="news-banner">
+    <div class="news-tag">НОВОСТЬ!</div>
+    <p><strong>4 провайдера LLM-чатов</strong> разрешили подключение кастомных MCP: <strong>GPT</strong>, <strong>Claude.ai</strong>, <strong>Perplexity</strong> и <strong>Grok</strong>.</p>
+  </div>
+</section>
+
+<!-- SLIDE 5: CONNECTION & COMMANDS -->
+<section class="slide" id="mcp-tools">
+  <div class="section-number">004</div>
+  <h2>Подключение и команды</h2>
+  <p class="section-desc">10 инструментов Context Manager для работы с памятью AI-помощников.</p>
+
+  <div style="width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 10px;">
+    <div class="cmd-list-header">Context Manager — 10 инструментов (расширяется на кастомные инструменты + шифрование)</div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_save_br</span>
+      <p class="cmd-desc">Сохранить кратко — авто-саммари беседы/контекста (200-300 символов)</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_save_im</span>
+      <p class="cmd-desc">Сохранить важное — структурированная запись по темам (до 3K символов)</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_save_fl</span>
+      <p class="cmd-desc">Сохранить полностью — весь лог сессии + документ дословно</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_search</span>
+      <p class="cmd-desc">Поиск по смыслу — найти похожие разговоры, даже если слова разные</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_query</span>
+      <p class="cmd-desc">Поиск с фильтрами — по дате, агенту, режиму сохранения</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_cross</span>
+      <p class="cmd-desc">Поиск в контексте другого агента — один AI просматривает записи другого</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_agents</span>
+      <p class="cmd-desc">Список всех AI-агентов с количеством их записей</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_stats</span>
+      <p class="cmd-desc">Статистика — сколько записей, когда последняя активность</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_export</span>
+      <p class="cmd-desc">Экспорт сессии в формате JSON — выгрузить для анализа</p>
+    </div>
+    <div class="card cmd-card">
+      <span class="cmd-name">cm_help</span>
+      <p class="cmd-desc">Показать список всех команд и их описание</p>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-top: 24px;">
+    <div class="card">
+      <h3>Способы подключения</h3>
+      <p>Три способа подключить Context Manager к вашим AI-инструментам:</p>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Standard MCP (стандартный)</strong> <span>— для AI-програм на вашем компьютере. Самый распространенный способ.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Web MCP (через интернет)</strong> <span>— для AI-програм в браузере. Использует порт :8770.</span></div>
+      </div>
+      <div class="feature-item">
+        <div class="check"><span style="color:#34d399;font-weight:bold">✓</span></div>
+        <div><strong>Direct HTTP (прямой доступ)</strong> <span>— без MCP, через веб-запросы на порт :3847. Если ваш AI не поддерживает MCP.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="explain">
+    <strong>Что такое MCP?</strong>
+
+    <strong>MCP</strong> — это единый стандарт подключения (язык общения) для AI-помощников.
+    Представьте, что у каждого AI-помощника есть "вилка", а у Context Manager — "розетка".
+    MCP — это международный стандарт, которого придерживаются все производители, чтобы вилка подошла к розетке.
+
+    Благодаря MCP вам не нужно настраивать каждую программу отдельно —
+    если AI поддерживает MCP, он автоматически "видит" Context Manager и может в него писать и читать.
+
+    <strong>Альтернатива (если ваш AI не поддерживает MCP):</strong>
+    Context Manager также работает через HTTP (протокол передачи данных — тот же, по которому работают веб-сайты).
+    В этом случае подключение настраивается один раз через веб-адрес (URL) и пароль.
+  </div>
+</section>
+
+<!-- SLIDE 6: METRICS -->
+<section class="slide" id="metrics">
+  <div class="section-number">005</div>
+  <h2>Цифры</h2>
+  <p class="section-desc">Ключевые показатели, которые демонстрируют масштаб Context Manager.</p>
+  <div class="grid-4" style="max-width: 900px;">
+    <div class="card metric">
+      <div class="value">10</div>
+      <div class="label">команд подключения</div>
+    </div>
+    <div class="card metric">
+      <div class="value">30</div>
+      <div class="label">API-команд (интерфейсов для обмена данными)</div>
+    </div>
+    <div class="card metric">
+      <div class="value">21</div>
+      <div class="label">файлов TypeScript (язык программирования)</div>
+    </div>
+    <div class="card metric">
+      <div class="value">2,771</div>
+      <div class="label">строк кода</div>
+    </div>
+    <div class="card metric">
+      <div class="value">384</div>
+      <div class="label">размерность вектора (число признаков "отпечатка смысла")<br><span style="font-size:11px;color:#6b7280;font-style:italic">"Разрешающая способность" отпечатка смысла</span></div>
+    </div>
+    <div class="card metric">
+      <div class="value">3</div>
+      <div class="label">уровня сохранения (Brief / Important / Full)</div>
+    </div>
+    <div class="card metric">
+      <div class="value">3</div>
+      <div class="label">режима поиска (по смыслу / по тексту / гибридный)</div>
+    </div>
+    <div class="card metric">
+      <div class="value">1,545</div>
+      <div class="label">сохраненных векторов (единиц смысла в Qdrant)</div>
+    </div>
+  </div>
+  <div style="margin-top: 24px; max-width: 900px; display: flex; gap: 24px; flex-wrap: wrap;">
+    <div class="card" style="flex:1;">
+      <h3>PostgreSQL (БД текста)</h3>
+      <p>23 колонки, 11 записей, 48 kB общего размера.<br>Оснащена умными индексами (индексы — ускорители поиска) для быстрого текстового поиска.</p>
+      <span class="tag green">хранилище</span>
+      <span class="glossary">Традиционная база данных, которая хранит информацию в таблицах, как электронные таблицы Excel</span>
+    </div>
+    <div class="card" style="flex:1;">
+      <h3>Qdrant (БД смыслов)</h3>
+      <p>1,545 векторов, 384 измерения каждое, 13 MB общего размера.<br>6 сегментов, статус: исправен.</p>
+      <span class="tag blue">векторы</span>
+      <span class="glossary">Специальная база данных, которая хранит "цифровые отпечатки смысла" — числа, представляющие значение текста, а не сам текст</span>
+    </div>
+    <div class="card" style="flex:1;">
+      <h3>ONNX Embedder (преобразователь смысла)</h3>
+      <p>40 MB размер модели, INT8-квантование (сжатие для скорости).<br>~15 миллисекунд на одно преобразование.</p>
+      <span class="tag orange">ML (машинное обучение)</span>
+      <span class="glossary">Компактная AI-модель, которая преобразует текст в его числовой "отпечаток смысла" (векторное представление)</span>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 7: TECH STACK -->
+<section class="slide" id="tech">
+  <div class="section-number">006</div>
+  <h2>Технологии</h2>
+  <p class="section-desc">Современные, легкие технологии. Никаких тяжелых фреймворков — работает офлайн, на любом компьютере.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3>Среда выполнения (Runtime)</h3>
+      <table class="compat-table">
+        <tr><td>Node.js</td><td>Среда для JavaScript — движок, который запускает сервер</td></tr>
+        <tr><td>TypeScript</td><td>Язык программирования — JavaScript с типами для надежности</td></tr>
+        <tr><td>Fastify</td><td>Веб-фреймворк — обрабатывает HTTP-запросы (интернет-обращения)</td></tr>
+        <tr><td>Pino</td><td>Журнал событий (логгер) — записывает, что делает система</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Хранилища (Storage)</h3>
+      <table class="compat-table">
+        <tr><td>PostgreSQL</td><td>Реляционная БД (база данных) — хранит текст с индексами для поиска</td></tr>
+        <tr><td>Qdrant</td><td>Векторная БД — хранит "отпечатки смысла" для поиска по смыслу</td></tr>
+        <tr><td>ONNX Embedder</td><td>ONNX runtime — запускает модель multilingual-e5-small</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Интеграция (Integration)</h3>
+      <table class="compat-table">
+        <tr><td>MCP SDK</td><td>Библиотека стандартного протокола — позволяет AI-помощникам подключаться</td></tr>
+        <tr><td>Axios</td><td>HTTP-клиент — выполняет сетевые запросы к другим сервисам</td></tr>
+        <tr><td>LangChain</td><td>Используется только для разделения текста — ничего тяжелого</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>НЕ используется</h3>
+      <p style="color: #f87171; font-size: 20px;">torch · transformers · langchain-core<br>redis · fastapi · hnswlib</p>
+      <p style="color: #6b7280; font-size: 12px; margin-top: 8px;">Этих тяжелых библиотек сознательно избегали ради скорости и простоты.</p>
+      <span class="glossary">Мы намеренно не используем тяжелые библиотеки — система легкая и работает без мощных серверов</span>
+    </div>
+  </div>
+  <p style="margin-top: 16px; color: #6b7280; font-size: 13px; max-width: 1100px;">
+    ✅ Все npm-зависимости — чистый JavaScript, никаких встроенных модулей. Работает на Windows, macOS и Linux без изменений.
+  </p>
+</section>
+
+<!-- SLIDE 8: DEPLOYMENT -->
+<section class="slide" id="deploy">
+  <div class="section-number">007</div>
+  <h2>Запуск и установка</h2>
+  <p class="section-desc">Три способа запуска Context Manager, в зависимости от ваших потребностей.</p>
+  <div class="grid-2">
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M235.3,74.5,129.1,44.15a4.09,4.09,0,0,0-1.67-.11L22.3,59.06A12.06,12.06,0,0,0,12,70.94V185.06a12.06,12.06,0,0,0,10.3,11.88l105.13,15a3.64,3.64,0,0,0,.57,0,4.11,4.11,0,0,0,1.1-.15L235.3,181.5A12,12,0,0,0,244,170V86A12,12,0,0,0,235.3,74.5ZM96,124H76V59.47l48-6.86V203.39l-48-6.86V132H96a4,4,0,0,0,0-8ZM20,185.06V70.94a4,4,0,0,1,3.43-4L68,60.61V124H48a4,4,0,0,0,0,8H68v63.39L23.43,189A4,4,0,0,1,20,185.06ZM236,170a4,4,0,0,1-2.9,3.84L132,202.7V53.3L233.1,82.19A4,4,0,0,1,236,86Z"/></svg> Docker Compose (3 сервиса)</h3>
+      <p>Docker (платформа контейнеризации) — это словно "виртуальная коробка", которая содержит все необходимое для работы. автоматическое управление и старт</p>
+      <table class="compat-table">
+        <tr><td>context-manager</td><td>:3847</td><td>~43 MiB</td><td>Главный сервер</td></tr>
+        <tr><td>tei-embeddings</td><td>:8080</td><td>~107 MiB</td><td>AI-модель для преобразования текста в смысл</td></tr>
+        <tr><td>cm-mcp-adapter</td><td>:8770</td><td>~2.6 MiB</td><td>MCP HTTP-адаптер</td></tr>
+      </table>
+      <p style="color: #6b7280; font-size: 13px; margin-top: 8px;">+ внешние: PostgreSQL :5432, Qdrant :6334</p>
+      <span class="glossary">Docker — технология "контейнеризации": программа упаковывается со всем необходимым для работы, как консервная банка</span>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M208,44H48A20,20,0,0,0,28,64V176a20,20,0,0,0,20,20h76v24H96a4,4,0,0,0,0,8h64a4,4,0,0,0,0-8H132V196h76a20,20,0,0,0,20-20V64A20,20,0,0,0,208,44ZM48,52H208a12,12,0,0,1,12,12v84H36V64A12,12,0,0,1,48,52ZM208,188H48a12,12,0,0,1-12-12V156H220v20A12,12,0,0,1,208,188Z"/></svg> Нативно (без Docker)</h3>
+      <p>Установка непосредственно на компьютер — без виртуализации.</p>
+      <table class="compat-table">
+        <tr><td>npm install</td><td>Установить все зависимости</td></tr>
+        <tr><td>npm run build</td><td>Скомпилировать TypeScript в JavaScript</td></tr>
+        <tr><td>npm start</td><td>Запустить сервер</td></tr>
+        <tr><td>npm run dev</td><td>Запуск в режиме разработки</td></tr>
+      </table>
+      <p style="color: #6b7280; font-size: 13px; margin-top: 8px;">Требуется: Node.js 18+, PostgreSQL, Qdrant</p>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.76,69.66l-88-48.18a12,12,0,0,0-11.52,0l-88,48.18A12,12,0,0,0,28,80.18v95.64a12,12,0,0,0,6.24,10.52l88,48.18a11.95,11.95,0,0,0,11.52,0l88-48.18A12,12,0,0,0,228,175.82V80.18A12,12,0,0,0,221.76,69.66ZM126.08,28.5a3.94,3.94,0,0,1,3.84,0L216.67,76,178.5,96.89a4,4,0,0,0-.58-.4l-88-48.18Zm1.92,96L39.33,76,81.56,52.87l88.67,48.54Zm-89.92,54.8a4,4,0,0,1-2.08-3.5V83.29l88,48.16v94.91Zm179.84,0h0l-85.92,47V131.45l40-21.89V152a4,4,0,0,0,8,0V105.18l40-21.89v92.53A4,4,0,0,1,217.92,179.32Z"/></svg> Управление процессами</h3>
+      <p>Инструменты для автоматического поддержания сервера в рабочем состоянии:</p>
+      <table class="compat-table">
+        <tr><td>Windows</td><td>nssm — запуск как службы Windows (автозапуск)</td></tr>
+        <tr><td>Linux</td><td>systemd — запуск как службы Linux (автозапуск)</td></tr>
+        <tr><td>macOS</td><td>launchd plist / Docker Desktop</td></tr>
+      </table>
+      <span class="glossary">"Служба" означает, что программа запускается автоматически при загрузке компьютера и работает в фоновом режиме</span>
+    </div>
+    <div class="card">
+      <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M241.72,113a11.88,11.88,0,0,0-9.73-5H212V88a12,12,0,0,0-12-12H129.33l-28.8-21.6a12.05,12.05,0,0,0-7.2-2.4H40A12,12,0,0,0,28,64V208a4,4,0,0,0,4,4H211.09a4,4,0,0,0,3.79-2.74l28.49-85.47A11.86,11.86,0,0,0,241.72,113ZM40,60H93.33a4,4,0,0,1,2.4.8L125.6,83.2a4,4,0,0,0,2.4.8h72a4,4,0,0,1,4,4v20H69.76a12,12,0,0,0-11.38,8.21L36,183.35V64A4,4,0,0,1,40,60Zm195.78,61.26L208.2,204H37.55L66,118.74A4,4,0,0,1,69.76,116H232a4,4,0,0,1,3.79,5.26Z"/></svg> Сеть (Network)</h3>
+      <p>Как компоненты находят друг друга:</p>
+      <table class="compat-table">
+        <tr><td>orchestrator-network</td><td>Общая Docker-сеть</td></tr>
+        <tr><td>localhost</td><td>Порты 3847, 6333, 5432, 8080 (только локальный компьютер)</td></tr>
+        <tr><td>Docker DNS</td><td>host.docker.internal — специальный адрес для доступа к хосту из Docker</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 9: COMPATIBILITY -->
+<section class="slide" id="compat">
+  <div class="section-number">008</div>
+  <h2>Кроссплатформенность</h2>
+  <p class="section-desc">Windows, macOS, Linux — тот же самый код работает везде. Отличаются только файлы настроек.</p>
+  <div style="max-width: 1100px; width: 100%; overflow-x: auto;">
+    <table class="compat-table">
+      <tr>
+        <th style="width:28%">Компонент</th>
+        <th style="width:24%">macOS</th>
+        <th style="width:24%">Linux</th>
+        <th style="width:24%">Windows</th>
+      </tr>
+      <tr>
+        <td>npm зависимости (библиотеки)<br><span style="font-size:11px;color:#6b7280;">Библиотеки, которые требуются программе</span></td>
+        <td class="status-ok">✅ pure JS</td>
+        <td class="status-ok">✅ pure JS</td>
+        <td class="status-ok">✅ pure JS</td>
+      </tr>
+      <tr>
+        <td>Fastify веб-сервер<br><span style="font-size:11px;color:#6b7280;">HTTP-сервер</span></td>
+        <td class="status-ok">✅</td>
+        <td class="status-ok">✅</td>
+        <td class="status-ok">✅</td>
+      </tr>
+      <tr>
+        <td>MCP подключение<br><span style="font-size:11px;color:#6b7280;">Стандартный разъем для AI</span></td>
+        <td class="status-ok">✅</td>
+        <td class="status-ok">✅</td>
+        <td class="status-ok">✅</td>
+      </tr>
+      <tr>
+        <td>PostgreSQL клиент<br><span style="font-size:11px;color:#6b7280;">Подключение к базе данных</span></td>
+        <td class="status-ok">✅ TCP</td>
+        <td class="status-ok">✅ TCP</td>
+        <td class="status-ok">✅ TCP</td>
+      </tr>
+      <tr>
+        <td>Qdrant клиент<br><span style="font-size:11px;color:#6b7280;">Подключение к векторной БД</span></td>
+        <td class="status-ok">✅ REST</td>
+        <td class="status-ok">✅ REST</td>
+        <td class="status-ok">✅ REST</td>
+      </tr>
+      <tr>
+        <td>Docker Desktop<br><span style="font-size:11px;color:#6b7280;">Платформа контейнеризации (опционально)</span></td>
+        <td class="status-ok">✅ HyperKit</td>
+        <td class="status-ok">✅ Нативно</td>
+        <td class="status-ok">✅ Не требуется (родная установка)</td>
+      </tr>
+      <tr>
+        <td>ONNX Embedder (AI-модель)<br><span style="font-size:11px;color:#6b7280;">Модель преобразования текста в смысл</span></td>
+        <td class="status-ok">✅ CPU</td>
+        <td class="status-ok">✅</td>
+        <td class="status-ok">✅ CPU</td>
+      </tr>
+      <tr>
+        <td>Пути к файлам настроек<br><span style="font-size:11px;color:#6b7280;">Где находятся конфигурационные файлы</span></td>
+        <td class="status-ok">~/Library/Application Support/</td>
+        <td class="status-ok">~/.config/</td>
+        <td class="status-ok">%APPDATA%</td>
+      </tr>
+    </table>
+  </div>
+  <div style="margin-top: 32px; max-width: 1100px; width: 100%;">
+    <div class="grid-3">
+      <div class="card">
+        <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M226.49,211.12a4,4,0,0,1-5.61-.62C219.54,208.82,188,168.48,188,88A60,60,0,0,0,68,88c0,80.48-31.53,120.82-32.88,122.5a4,4,0,0,1-6.25-5C29.18,205.11,60,165.45,60,88a68,68,0,0,1,136,0c0,40.48,8.47,70.27,15.57,88.14,7.69,19.35,15.48,29.27,15.56,29.36A4,4,0,0,1,226.49,211.12ZM100,92a8,8,0,1,0,8,8A8,8,0,0,0,100,92Zm64,8a8,8,0,1,0-8,8A8,8,0,0,0,164,100ZM97.79,132.42a4,4,0,1,0-3.58,7.16l32,16a4,4,0,0,0,3.58,0l32-16a4,4,0,0,0-3.58-7.16L128,147.53ZM128,180a50.05,50.05,0,0,0-43.49,26.05,4,4,0,1,0,7,3.89,41.34,41.34,0,0,1,73,0A4,4,0,0,0,168,212a3.94,3.94,0,0,0,1.94-.51,4,4,0,0,0,1.55-5.44A50.07,50.07,0,0,0,128,180Z"/></svg> Linux</h3>
+        <p style="color: #34d399;">Полная поддержка.</p>
+        <p style="color: #9ca3af; font-size: 13px;">Docker-нативно, systemd-служба, все работает "из коробки".</p>
+      </div>
+      <div class="card">
+        <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M218.27,169.49C199.86,156.84,196,135.6,196,120c0-19.17,14.25-35.53,22.75-43.57a4,4,0,0,0,0-5.81C207,59.48,186.59,52,168,52a68.3,68.3,0,0,0-40,13,67.61,67.61,0,0,0-87.88,7A70.65,70.65,0,0,0,20,123.3a123.11,123.11,0,0,0,38.9,86.92A35.81,35.81,0,0,0,83.6,220h87.7a35.84,35.84,0,0,0,26.19-11.3,119.93,119.93,0,0,0,17.24-23.79c6.08-11.1,5.42-12.62,4.94-13.72A4,4,0,0,0,218.27,169.49Zm-26.64,33.77A27.83,27.83,0,0,1,171.3,212H83.6a27.84,27.84,0,0,1-19.19-7.6A115.15,115.15,0,0,1,28,123.09,62.55,62.55,0,0,1,45.81,77.66,58.78,58.78,0,0,1,88,60h.84a59.37,59.37,0,0,1,36.66,13.15,4,4,0,0,0,5,0A59.35,59.35,0,0,1,168,60c15.12,0,31.45,5.41,42.11,13.73C200.68,83.42,188,100.16,188,120c0,23.79,8,42.44,23.12,54.17A107.64,107.64,0,0,1,191.63,203.26ZM132.13,31A36,36,0,0,1,167,4h1a4,4,0,0,1,0,8h-1a28,28,0,0,0-27.12,21A4,4,0,0,1,136,36a3.87,3.87,0,0,1-1-.13A4,4,0,0,1,132.13,31Z"/></svg> macOS</h3>
+        <p style="color: #34d399;">Полная поддержка.</p>
+        <p style="color: #9ca3af; font-size: 13px;">Работает нативно, Docker Desktop, launchd-служба. Пути конфигов — ~/Library/Application Support/.</p>
+      </div>
+      <div class="card">
+        <h3><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,44H40A12,12,0,0,0,28,56V200a12,12,0,0,0,12,12H216a12,12,0,0,0,12-12V56A12,12,0,0,0,216,44Zm4,156a4,4,0,0,1-4,4H40a4,4,0,0,1-4-4V56a4,4,0,0,1,4-4H216a4,4,0,0,1,4,4ZM76,84a8,8,0,1,1-8-8A8,8,0,0,1,76,84Zm40,0a8,8,0,1,1-8-8A8,8,0,0,1,116,84Z"/></svg> Windows</h3>
+        <p style="color: #34d399;">Полная поддержка.</p>
+        <p style="color: #9ca3af; font-size: 13px;">Нативный ONNX runtime, nssm-служба, один-click инсталлятор. Все работает "из коробки".</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SLIDE 10: END -->
+<section class="slide" id="end">
+  <div class="badge">Context Manager v2.3.2</div>
+  <h1>Спасибо</h1>
+  <p>Постоянная память для AI-помощников.<br>PostgreSQL + Qdrant + MCP.</p>
+  <p style="margin-top: 24px; color: #6b7280; font-size: 14px; max-width: 600px; margin-left: auto; margin-right: auto;">
+    Инструмент, который помогает AI помнить — чтобы вам не приходилось повторяться.
+  </p>
+
+  <div style="margin-top: 48px;">
+    <div style="display: inline-flex; gap: 24px; flex-wrap: wrap; justify-content: center;">
+      <span style="color: #6b7280; font-size: 14px;"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M216,76H129.66L101.17,47.52A11.9,11.9,0,0,0,92.69,44H40A12,12,0,0,0,28,56V200.62A11.4,11.4,0,0,0,39.38,212H216.89A11.12,11.12,0,0,0,228,200.89V88A12,12,0,0,0,216,76ZM36,56a4,4,0,0,1,4-4H92.69a4,4,0,0,1,2.82,1.17L118.34,76H36ZM220,200.89a3.12,3.12,0,0,1-3.11,3.11H39.38A3.39,3.39,0,0,1,36,200.62V84H216a4,4,0,0,1,4,4Z"/></svg> context-manager/</span>
+      <span style="color: #6b7280; font-size: 14px;"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M210.83,85.17l-56-56A4,4,0,0,0,152,28H56A12,12,0,0,0,44,40V216a12,12,0,0,0,12,12H200a12,12,0,0,0,12-12V88A4,4,0,0,0,210.83,85.17ZM156,41.65,198.34,84H156ZM200,220H56a4,4,0,0,1-4-4V40a4,4,0,0,1,4-4h92V88a4,4,0,0,0,4,4h52V216A4,4,0,0,1,200,220Zm-36-84a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,136Zm0,32a4,4,0,0,1-4,4H96a4,4,0,0,1,0-8h64A4,4,0,0,1,164,168Z"/></svg> docs/</span>
+      <span style="color: #6b7280; font-size: 14px;"><svg style="vertical-align:middle" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="currentColor"><path d="M221.76,69.66l-88-48.18a12,12,0,0,0-11.52,0l-88,48.18A12,12,0,0,0,28,80.18v95.64a12,12,0,0,0,6.24,10.52l88,48.18a11.95,11.95,0,0,0,11.52,0l88-48.18A12,12,0,0,0,228,175.82V80.18A12,12,0,0,0,221.76,69.66ZM126.08,28.5a3.94,3.94,0,0,1,3.84,0L216.67,76,178.5,96.89a4,4,0,0,0-.58-.4l-88-48.18Zm1.92,96L39.33,76,81.56,52.87l88.67,48.54Zm-89.92,54.8a4,4,0,0,1-2.08-3.5V83.29l88,48.16v94.91Zm179.84,0h0l-85.92,47V131.45l40-21.89V152a4,4,0,0,0,8,0V105.18l40-21.89v92.53A4,4,0,0,1,217.92,179.32Z"/></svg> универсальный разъем</span>
+    </div>
+  </div>
+  <p style="margin-top:48px;">
+    <a href="https://github.com/GG-QandV/context-manager" target="_blank" style="color:#7c3aed;text-decoration:none;font-size:14px;transition:color 0.2s;" onmouseover="this.style.color='#a78bfa'" onmouseout="this.style.color='#7c3aed'">github.com/GG-QandV/context-manager</a>
+  </p>
+</section>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      document.querySelectorAll('.nav-dots a').forEach(a => a.classList.remove('active'));
+      const id = entry.target.id;
+      document.querySelector(`.nav-dots a[href="#${id}"]`)?.classList.add('active');
+    }
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.slide').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
