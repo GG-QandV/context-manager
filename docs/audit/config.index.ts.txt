@@ -1,0 +1,23 @@
+--- a/src/config/index.ts
++++ b/src/config/index.ts
+@@ -27,10 +27,6 @@ export interface Config {
+   sync: {
+     enabled: boolean;
+     batchSize: number;
+     intervalMs: number;
+   };
+-  audit: {
+-    enabled: boolean;
+-    intervalMs: number;
+-  };
+ }
+@@ -75,10 +71,6 @@ function loadConfig(): Config {
+       batchSize: parseInt(process.env.SYNC_BATCH_SIZE || '100', 10),
+       intervalMs: parseInt(process.env.SYNC_INTERVAL_MS || '60000', 10),
+     },
+-    audit: {
+-      enabled: process.env.AUDIT_ENABLED !== 'false',
+-      intervalMs: parseInt(process.env.AUDIT_INTERVAL_MS || '300000', 10),
+-    },
+   };
+ }

@@ -1,0 +1,45 @@
+--- a/src/services/qdrant.service.ts
++++ b/src/services/qdrant.service.ts
+@@ -7,6 +7,11 @@ import crypto from 'crypto';
+
++interface QdrantPointPayload {
++  syncId?: string;
++  [key: string]: unknown;
++}
++
+ class QdrantService {
+   private client: QdrantClient;
+   private collectionName = 'DevelopmentContext';
+@@ -184,15 +189,18 @@ class QdrantService {
+   async getAllDistinctSyncIds(): Promise<string[]> {
+     const syncIds = new Set<string>();
+-    let offset: number | undefined = 0;
++    let offset: unknown = 0;
+
+     while (offset !== undefined) {
+       const result = await this.client.scroll(this.collectionName, {
+         limit: 1000,
+         offset,
+-        with_payload: ['syncId'],
++        with_payload: true,
+       });
+
+       for (const point of result.points) {
+-        const syncId = (point.payload as any)?.syncId;
++        const payload = point.payload as QdrantPointPayload;
++        const syncId = payload?.syncId;
+         if (syncId) {
+           syncIds.add(String(syncId));
+         }
+@@ -200,8 +208,11 @@ class QdrantService {
+
+       if (result.next_page_offset) {
+-        offset = result.next_page_offset as number;
++        const next = result.next_page_offset;
++        offset = typeof next === 'number' ? next : undefined;
++      } else if (result.next_page_offset === 0) {
++        offset = undefined;
+       } else {
+         offset = undefined;
+       }
+     }
