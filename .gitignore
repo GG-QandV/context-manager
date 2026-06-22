@@ -29,3 +29,6 @@ models/
 # Cleaned docx artifacts
 *_clean.docx
 __pycache__/
+
+# Audit workflow
+docs/GAPS_AUDIT_WORKFLOW.md
