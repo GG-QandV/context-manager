@@ -203,8 +203,7 @@ class QdrantService {
       }
 
       const next = result.next_page_offset;
-      if (next !== undefined && next !== null && typeof next === 'number') {
-        if (next === 0) break;
+      if (next !== undefined && next !== null && next !== 0) {
         offset = next;
       } else {
         offset = undefined;
