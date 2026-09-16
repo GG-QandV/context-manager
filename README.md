@@ -15,6 +15,8 @@
 
 </div>
 
+![Context Manager Architecture](docs/cm-presentation/img/scheme_C-M.jpg)
+
 Your AI agents — Claude, ChatGPT, Gemini, custom agents — talk to each other across sessions. Context Manager is the memory layer that makes this work: save context, search it semantically later, and keep your agents from forgetting what they did yesterday.
 
 Runs on **Windows, Linux, and macOS**. No cloud required. No Docker required on Windows.
